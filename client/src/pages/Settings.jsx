@@ -42,26 +42,7 @@ const Settings = () => {
     fetchPrompts();
   }, [fetchSettings, fetchPrompts]);
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setSettings(prev => ({ ...prev, [name]: value }));
-  };
-
-  const handleSaveSettings = async (e) => {
-    e.preventDefault();
-    try {
-      setError(null);
-      const response = await fetch('http://localhost:3000/api/settings', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(settings),
-      });
-      if (!response.ok) throw new Error('Failed to save settings.');
-      alert('Settings saved successfully!');
-    } catch (e) {
-      setError(e.message);
-    }
-  };
+  
 
   const handleAddPrompt = async (e) => {
     e.preventDefault();
@@ -141,37 +122,33 @@ const Settings = () => {
 
   return (
     <div style={{ padding: '0 0.5em' }}>
-      <h2>Settings</h2>
       {error && <p style={{ color: 'red' }}>Error: {error}</p>}
       
-      <form onSubmit={handleSaveSettings}>
-        <h3>General Settings</h3>
-        <div style={{ marginBottom: '1rem' }}>
-          <label>Data Folder Path:</label>
-          <input 
-            type="text" 
-            name="data_folder" 
-            value={settings.data_folder}
-            onChange={handleChange}
-            style={{ width: '100%', marginTop: '0.5rem' }}
-          />
-        </div>
-        <div style={{ marginBottom: '1rem' }}>
-          <label>Gemini API Key:</label>
-          <input 
-            type="password" 
-            name="gemini_api_key"
-            value={settings.gemini_api_key}
-            onChange={handleChange}
-            style={{ width: '100%', marginTop: '0.5rem' }}
-          />
-        </div>
-        <button type="submit">Save Settings</button>
-      </form>
+      <h2>General Settings</h2>
+      <div style={{ marginBottom: '1rem' }}>
+        <label>Data Folder Path:</label>
+        <input 
+          type="text" 
+          name="data_folder" 
+          value={settings.data_folder}
+          readOnly
+          style={{ width: '100%', marginTop: '0.5rem' }}
+        />
+      </div>
+      <div style={{ marginBottom: '1rem' }}>
+        <label>Gemini API Key:</label>
+        <input 
+          type="password" 
+          name="gemini_api_key"
+          value={settings.gemini_api_key}
+          readOnly
+          style={{ width: '100%', marginTop: '0.5rem' }}
+        />
+      </div>
 
       <hr style={{ margin: '2rem 0' }} />
 
-      <h3>Custom Prompts</h3>
+      <h2>Custom Prompts</h2>
       <form onSubmit={handleAddPrompt}>
         <div style={{ marginBottom: '1rem' }}>
           <label>Prompt Key:</label>

@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import EditDocumentForm from '../components/EditDocumentForm';
 import DocumentDetail from './DocumentDetail';
 
-const DocumentList = ({ topicName, onBackToTopics }) => {
+const DocumentList = ({ topicName, onBackToTopics, onSetDocumentTitle }) => {
   const [documents, setDocuments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -12,7 +12,10 @@ const DocumentList = ({ topicName, onBackToTopics }) => {
   const [selectedDocHash, setSelectedDocHash] = useState(null);
   const [isDraggingOver, setIsDraggingOver] = useState(false);
 
-  const memoizedOnBackToDocumentList = useCallback(() => setSelectedDocHash(null), [setSelectedDocHash]);
+  const memoizedOnBackToDocumentList = useCallback(() => {
+    setSelectedDocHash(null);
+    onSetDocumentTitle(''); // Reset documentTitle when going back to document list
+  }, [setSelectedDocHash, onSetDocumentTitle]);
 
   useEffect(() => {
     const loadDocuments = async () => {
@@ -211,7 +214,7 @@ const DocumentList = ({ topicName, onBackToTopics }) => {
 
   // Render the Document Detail view if a document is selected
   if (selectedDocHash) {
-    return <DocumentDetail docHash={selectedDocHash} onBack={memoizedOnBackToDocumentList} />;
+    return <DocumentDetail docHash={selectedDocHash} onBack={memoizedOnBackToDocumentList} onSetDocumentTitle={onSetDocumentTitle} />;
   }
 
   // Render the Document List view

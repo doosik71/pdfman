@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { PanelGroup, Panel, PanelResizeHandle } from 'react-resizable-panels';
 
-const DocumentDetail = ({ docHash, onBack }) => {
+const DocumentDetail = ({ docHash, onBack, onSetDocumentTitle }) => {
   const [details, setDetails] = useState(null);
   const [summary, setSummary] = useState('');
   const [summaryExists, setSummaryExists] = useState(false);
@@ -25,6 +25,9 @@ const DocumentDetail = ({ docHash, onBack }) => {
       }
       const detailsData = await detailsRes.json();
       setDetails(detailsData);
+      if (onSetDocumentTitle) {
+        onSetDocumentTitle(detailsData.title);
+      }
 
       if (summaryRes.ok) {
         const summaryData = await summaryRes.text();
@@ -39,7 +42,7 @@ const DocumentDetail = ({ docHash, onBack }) => {
     } finally {
       setLoading(false);
     }
-  }, [docHash, onBack]);
+  }, [docHash, onBack, onSetDocumentTitle]);
 
   useEffect(() => {
     fetchInitialData();
@@ -74,17 +77,41 @@ const DocumentDetail = ({ docHash, onBack }) => {
     }
   };
 
+  const handleDeleteSummary = async () => {
+    if (window.confirm('Are you sure you want to delete this summary?')) {
+      try {
+        const response = await fetch(`http://localhost:3000/api/summaries/${docHash}`, {
+          method: 'DELETE',
+        });
+
+        if (!response.ok) {
+          throw new Error(`Failed to delete summary: ${response.status}`);
+        }
+
+        setSummary('');
+        setSummaryExists(false);
+        alert('Summary deleted successfully!');
+      } catch (e) {
+        setError(e.message);
+        alert(`Error deleting summary: ${e.message}`);
+      }
+    }
+  };
+
   return (
-    <div id="document-detail-header-area" style={{ display: 'flex', flexDirection: 'column' }}>
+    <div id="document-detail-area" style={{ display: 'flex', flexDirection: 'column', height: 'calc(100vh - 62px)' }}>
       <button onClick={onBack} style={{ alignSelf: 'flex-start', flexShrink: 0 }}>&larr; Back to Document List</button>
       {loading && <p>Loading document details...</p>}
       {error && <p style={{ color: 'red' }}>Error: {error}</p>}
       {details && (
         <>
-          <h2 style={{ flexShrink: 0 }}>{details.title}</h2>
           <PanelGroup direction="horizontal" style={{ flexGrow: 1 }}>
             <Panel defaultSize={50} minSize={20}>
-              <div style={{ flex: 1, border: '1px solid #ccc', marginRight: '1rem' }}>
+              <div style={{
+                flex: 1,
+                border: '1px solid #ccc',
+                height: '100%'
+              }}>
                 <embed
                   src={`http://localhost:3000/api/pdfs/${docHash}`}
                   type="application/pdf"
@@ -93,16 +120,28 @@ const DocumentDetail = ({ docHash, onBack }) => {
                 />
               </div>
             </Panel>
-            <PanelResizeHandle style={{ width: '10px', background: '#ccc', cursor: 'ew-resize' }} />
+            <PanelResizeHandle style={{ width: '5px', background: '#ccc', cursor: 'ew-resize' }} />
             <Panel defaultSize={50} minSize={20}>
-              <div id="document-summary-panel" style={{ flex: 1, border: '1px solid #ccc', padding: '1rem', overflowY: 'auto' }}>
-                <h3>Metadata</h3>
+              <div id="document-summary-panel" style={{
+                flex: 1,
+                border: '1px solid #ccc',
+                padding: '1rem',
+                height: '100%',
+                overflowY: 'auto'
+              }}>
                 <p>
                   <strong>Authors:</strong> {details.authors.join(', ') || 'N/A'}
                   {details.year && ` • ${details.year}`}
                 </p>
                 <hr />
-                <h3>AI Summary</h3>
+                <h3 style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  AI Summary
+                  {summaryExists && !isSummarizing && (
+                    <button onClick={handleDeleteSummary} style={{ fontSize: '0.8em', padding: '0.3em 0.6em' }}>
+                      Delete Summary
+                    </button>
+                  )}
+                </h3>
                 {summaryExists && !isSummarizing ? (
                   <ReactMarkdown>{summary}</ReactMarkdown>
                 ) : (

@@ -11,7 +11,7 @@ const axios = require('axios');
 const { GoogleGenerativeAI } = require('@google/generative-ai');
 const pdf = require('pdf-parse');
 
-const dataDir = path.join(__dirname, 'data');
+const dataDir = process.env.PDFMAN_DATA_DIR || path.join(__dirname, 'data');
 const upload = multer({ storage: multer.memoryStorage() });
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
@@ -219,25 +219,18 @@ function initializeExpressApp() {
     // --- SETTINGS API ---
     app.get('/api/settings', async (req, res) => {
         try {
-            const settingsPath = path.join(dataDir, 'settings.json');
-            const settings = JSON.parse(await fs.readFile(settingsPath));
+            const settings = {
+                data_folder: dataDir,
+                gemini_api_key: process.env.GEMINI_API_KEY || ''
+            };
             res.json(settings);
         } catch (err) {
-            res.status(500).send('Error reading settings.');
+            console.error("Error fetching settings:", err);
+            res.status(500).send('Error fetching settings.');
         }
     });
 
-    app.post('/api/settings', async (req, res) => {
-        try {
-            const settingsPath = path.join(dataDir, 'settings.json');
-            const existingSettings = JSON.parse(await fs.readFile(settingsPath));
-            const newSettings = { ...existingSettings, ...req.body };
-            await fs.writeFile(settingsPath, JSON.stringify(newSettings, null, 2));
-            res.json(newSettings);
-        } catch (err) {
-            res.status(500).send('Error saving settings.');
-        }
-    });
+    
 
     // --- PROMPT API ---
     app.get('/api/prompts', async (req, res) => {
@@ -313,6 +306,20 @@ function initializeExpressApp() {
         } catch (err) {
             if (err.code === 'ENOENT') return res.status(404).send('Summary not found.');
             res.status(500).send('Error reading summary.');
+        }
+    });
+
+    app.delete('/api/summaries/:hash', async (req, res) => {
+        const { hash } = req.params;
+        const docInfo = await findDocument(hash);
+        if (!docInfo) return res.status(404).send('Document not found.');
+        try {
+            const summaryPath = path.join(path.dirname(docInfo.filePath), `${hash}.md`);
+            await fs.unlink(summaryPath);
+            res.send({ message: 'Summary deleted successfully.' });
+        } catch (err) {
+            if (err.code === 'ENOENT') return res.status(404).send('Summary file not found.');
+            res.status(500).send('Error deleting summary.');
         }
     });
 

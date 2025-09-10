@@ -12,10 +12,18 @@ import './App.css';
 function App() {
   const [currentView, setCurrentView] = useState({ name: 'topics' }); // { name: 'topics' } | { name: 'documents', topicName: '' } | { name: 'settings' }
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [documentTitle, setDocumentTitle] = useState('');
+
+  const handleSetDocumentTitle = useCallback((title) => {
+    setDocumentTitle(title);
+  }, []);
 
   const handleNavigate = useCallback((viewName, topicName = null) => {
     setCurrentView({ name: viewName, topicName });
-  }, [setCurrentView]);
+    if (viewName === 'topics') {
+      setDocumentTitle(''); // Reset documentTitle when navigating to topics
+    }
+  }, [setCurrentView, setDocumentTitle]);
 
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
@@ -33,10 +41,11 @@ function App() {
       content = (
         <DocumentList 
           topicName={currentView.topicName} 
-          onBackToTopics={() => handleNavigate('topics')} // Pass the actual navigation function
+          onBackToTopics={() => handleNavigate('topics')} 
+          onSetDocumentTitle={handleSetDocumentTitle} // Pass the callback
         />
       );
-      headerProps = { title: `Documents for: ${currentView.topicName}` };
+      headerProps = { title: documentTitle || currentView.topicName };
       break;
     case 'settings':
       content = <Settings />;

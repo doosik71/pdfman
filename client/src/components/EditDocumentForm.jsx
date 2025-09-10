@@ -33,30 +33,34 @@ const EditDocumentForm = ({ doc, onSave, onCancel }) => {
   };
 
   return (
-    <form onSubmit={handleSubmit} style={{ background: '#f9f9f9', padding: '1rem', borderRadius: '8px' }}>
-      <div style={{ marginBottom: '1rem' }}>
+    <form onSubmit={handleSubmit} style={{
+      background: '#f9f9f9',
+      padding: '0.5rem',
+      borderRadius: '8px'
+    }}>
+      <div style={{ marginBottom: '0.5rem' }}>
         <label>Title:</label>
         <input type="text" name="title" value={formData.title} onChange={handleChange} style={{ width: '100%', marginTop: '0.5rem' }} />
       </div>
-      
-      <div style={{ marginBottom: '1rem' }}>
+
+      <div style={{ marginBottom: '0.5rem' }}>
         <label>Authors (comma-separated):</label>
         <input type="text" name="authors" value={formData.authors} onChange={handleChange} style={{ width: '100%', marginTop: '0.5rem' }} />
       </div>
-      
-      <div style={{ marginBottom: '1rem' }}>
+
+      <div style={{ marginBottom: '0.5rem' }}>
         <label>Year:</label>
         <input type="number" name="year" value={formData.year} onChange={handleChange} style={{ width: '100%', marginTop: '0.5rem' }} />
       </div>
-      
-      <div style={{ marginBottom: '1rem' }}>
+
+      <div style={{ marginBottom: '0.5rem' }}>
         <label>Tags (comma-separated):</label>
         <input type="text" name="tags" value={formData.tags} onChange={handleChange} style={{ width: '100%', marginTop: '0.5rem' }} />
       </div>
-      
+
       <div>
-        <button type="submit">Save</button>
-        <button type="button" onClick={onCancel} style={{ marginLeft: '0.5rem' }}>Cancel</button>
+        <button type="submit" style={{ padding: '0.3em 0.6em', fontSize: '0.9em' }}>Save</button>
+        <button type="button" onClick={onCancel} style={{ marginLeft: '0.5rem', padding: '0.3em 0.6em', fontSize: '0.9em' }}>Cancel</button>
       </div>
     </form>
   );
