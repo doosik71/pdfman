@@ -1,96 +1,126 @@
 # PDFMan
 
-PDFMan은 PDF 문서를 관리하는 Node.js 기반 웹 앱이다.
-프론트앤드는 React 프레임워크를 사용한다.
-Electron을 이용하여 데스크톱 앱으로 패키징할 수 있다.
-Gemini를 이용해 PDF 문서를 요약하고 요약 정보를 파일에 저장할 수 있다.
+PDFMan is a Node.js-based web application for managing PDF documents. It features a React frontend and can be packaged as a desktop application using Electron. It also integrates with the Gemini API for summarizing PDF documents.
 
-## 사용하는 패키지
+## Features
 
-* **@google/generative-ai**: Gemini에 논문 요약 요청을 위해 사용
-* **axios**: HTTP 클라이언트 라이브러리
-* **dotenv**: 사용자 환경 설정을 읽는 라이브러리
-* **express**: 웹 앱 개발 프레임워크
-* **electron**: 데스크톱 앱 패키징을 위해 사용
-* **electron-builder**: Electron 앱 배포를 위한 빌더
-* **react**, **react-dom**: UI 구축을 위한 라이브러리
-* **vite**: 프론트엔드 빌드 도구
-* **nodemon**: 개발 중 서버 자동 재시작을 위해 사용
-* **xml2js**: XML 파서
-* **pdf-parse**: PDF 파일 텍스트 추출
-* 기타
+### Core Functionality
 
-## 특징 및 기능
+* **Backend:** Node.js with Express.js.
+* **Frontend:** React with Vite.
+* **Desktop Application:** Can be packaged using Electron.
+* **Environment Check:** Verifies `GEMINI_API_KEY` and `userprompt.json` on startup.
+* **UI Language:** English.
+* **Code Style:** All functions have English docstrings.
 
-* Node.js와 Express 백엔드, React 프론트엔드를 사용하는 단일 페이지 애플리케이션(SPA)이다.
-* Electron을 통해 크로스-플랫폼 데스크톱 애플리케이션으로 제공됩니다.
-* 앱이 시작될 때 `GEMINI_API_KEY` 환경 변수와 `userprompt.json` 파일의 존재 여부를 확인하고, 없을 경우 에러 메시지를 표시한다.
-* 웹 UI 인터페이스 언어는 영어를 사용한다.
-* 소스 코드에서 정의된 모든 함수에는 영어로 작성된 docstring이 있다.
-* 웹 페이지의 좌측에 접이식 사이드 메뉴를 배치한다.
+### Topic List Screen
 
-### Topic List 화면의 주요 기능
+* **Management:** Add, delete, and view topics.
+* **Search:** Filter topic list.
+* **Display:** Topics shown as cards with document counts.
+* **Deletion:** Topics can only be deleted if they contain no documents.
+* **Navigation:** Selecting a topic navigates to the Document List screen.
 
-* 초기 화면은 "Topic List"이며, 토픽을 추가, 삭제, 변경할 수 있다.
-* 검색창을 통해 토픽 목록을 필터링할 수 있다.
-* 토픽 목록은 카드 형식으로 표시되며, 각 카드에는 토픽 이름과 함께 해당 토픽에 포함된 문서의 수가 표시된다.
-* 각 카드 우측 상단의 '×' 버튼으로 토픽을 삭제할 수 있다. 토픽에 문서가 있으면 삭제가 실패하고 오류 메시지가 표시된다.
-* 화면 하단의 입력 폼을 통해 새로운 토픽을 추가할 수 있다.
-* 사용자가 토픽을 선택하면 "Document List" 화면으로 전환된다.
+### Document List Screen
 
-### Document List 화면의 주요 기능
+* **Document Management:** Upload PDF files, add documents from URLs, edit metadata (title, author, year, tags), delete documents, and move documents between topics.
+* **Display:** Documents are listed and sorted by year (descending) then title (ascending).
+* **Drag-and-Drop:** Supports drag-and-drop for PDF uploads.
+* **Navigation:** Selecting a document navigates to the Document Detail screen.
 
-* 문서 목록 화면에는 PDF를 업로드하거나 PDF의 URL을 이용하여 문서 정보를 추가할 수 있다.
-* 화면 상단에 현재 선택된 주제의 이름과 "Back to Topics" 링크가 표시된다.
-* 문서 정보의 제목, 저자, 연도, 태그를 편집 및 수정할 수 있다.
-* 문서 목록을 정렬, 검색할 수 있다. 기본 정렬값은 연도로 정렬하고 연도가 같으면 제목으로 정렬한다.
-* 태그는 하나 이상의 단어 또는 문자로 구성할 수 있다. 예: "중요", "데이터", "읽음", "⭐", "📌"
-* 문서 정보를 삭제하거나 다른 토픽으로 옮길 수 있다.
-* 문서를 선택하면 문서 정보 상세 보기 화면으로 이동한다.
+### Document Detail Screen
 
-### Document Detail 화면의 주요 기능
+* **Layout:** Two-panel view with PDF content on the left and information/summary on the right.
+* **PDF Viewer:** Displays PDF content using the browser's native capabilities.
+* **AI Summarization:** Generates summaries of PDF content using the Gemini 2.5 Flash model. Summaries are streamed in real-time and saved as Markdown files.
+* **Prompt Management:** Allows users to manage custom AI prompts (add, edit, delete).
 
-* 문서 정보 보기 화면은 좌우의 두 패널로 나누어진다.
-* 왼쪽 패널에서 PDF의 내용을 볼 수 있다.
-* 오른쪽 패널은 상중하의 세 영역으로 나눈다.
-* 상단의 영역은 문서의 기본 정보(제목, 저자, 연도)가 한 줄로 표시된다.
-* 중간의 영역은 PDF의 내용으로부터 자동 생성된 AI 요약 정보가 표시된다.
-* 자동 생성된 AI 요약 정보가 없으면 "Summarize" 버튼이 대신 표시된다.
-* 사용자가 "Summarize" 버튼을 누르면, Gemini API를 통해 문서 요약을 생성한다.
-* 생성된 요약은 스트리밍 방식으로 실시간 표시되며, 완료 후 요약 정보는 파일로 저장된다.
-* 요약 내용의 우측 상단에는 자동 요약 정보를 삭제할 수 있는 "Delete" 버튼이 있다.
-* 요약문에서 추출된 목차 정보가 사이드 메뉴에 표시되어 문서 내 탐색을 돕는다.
-* 요약 내용은 마크다운 형식으로 렌더링되며, MathJax를 통해 수식을 지원한다. (`$...$` 및 `$$...$$` 형식 모두 지원)
-* 하단의 영역에서는 AI와 질의응답이 가능한 채팅창이 표시된다.
+### Settings Screen
 
-### Setting 화면의 주요 기능
+* **Configuration:** Manage data folder path and Gemini API key.
+* **Custom Prompts:** Add, edit, and delete custom prompts for AI interactions. The 'summarize' prompt is protected from deletion.
 
-* 설정 화면은 프로그램의 동작에 관한 설정을 관리한다.
-* 데이터 폴더의 경로를 지정할 수 있다.
-* Gemini 사용을 위한 `GEMINI_API_KEY`를 설정할 수 있다.
-* 사용자 정의 프롬프트를 추가, 삭제, 변경할 수 있다.
+## Technologies Used
 
-## AI 자동 요약
+* **Backend:** Node.js, Express.js, `dotenv`, `multer`, `cors`, `axios`, `pdf-parse`, `@google/generative-ai`.
+* **Frontend:** React, Vite.
+* **Desktop:** Electron, `electron-builder`.
 
-* PDF 문서의 요약은 Gemini 2.5 Flash 모델을 이용한다.
-* 아래의 코드는 PDF에서 추출한 텍스트를 이용하여 Gemini에게 문서 요약을 요청하는 예이다.
+## How to Run
 
-```javascript
-const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
-const pdfParser = require('pdf-parse');
-const data = await pdfParser(response.data);
-const prompt = userPrompt.replace('{context}', data.text);
-const result = await model.generateContentStream(prompt);
+### Prerequisites
+
+* Node.js (LTS version recommended)
+* npm (Node Package Manager)
+
+### Setup
+
+1. **Clone the repository:**
+
+    ```bash
+    git clone <repository-url>
+    cd pdfman
+    ```
+
+2. **Install Backend Dependencies:**
+
+    ```bash
+    npm install
+    ```
+
+3. **Install Frontend Dependencies:**
+
+    ```bash
+    cd client
+    npm install
+    cd ..
+    ```
+
+4. **Create Environment File:**
+    Create a `.env` file in the project root (`pdfman/`) and add your Gemini API Key:
+
+    ```
+    GEMINI_API_KEY=YOUR_GEMINI_API_KEY
+    ```
+
+    (Replace `YOUR_GEMINI_API_KEY` with your actual key.)
+
+### Running the Application
+
+#### 1. Run the Backend Server
+
+In the project root directory (`pdfman/`):
+
+```bash
+npm start
 ```
 
-## 데이터 관리
+This will start the Express backend server, typically on `http://localhost:3000`.
 
-* 토픽과 문서 정보는 데이터 폴더로 관리된다.
-* 기본적으로 데이터 폴더의 경로는 PDFMan 프로그램이 실행된 폴더의 data 폴더이며, 사용자 설정으로 데이터 폴더의 경로를 변경할 수 있다.
-* 사용자가 생성한 토픽은 데이터 폴더 안의 서브 폴더에 대응한다.
-* 문서 정보는 토픽 폴더의 안에 json 형식의 파일로 저장된다.
-* 사용자가 업로드한 PDF 파일 또는 URL로 지정한 PDF 파일의 해쉬값을 이용하여 json 파일의 이름을 결정한다.
-* PDF 파일도 토픽 폴더에 저장되며, 해쉬값으로 이름을 지정한다.
-* PDF의 내용을 자동 요약한 정보는 마크다운 파일(.md)로 저장되며 이름은 PDF의 해쉬값으로 결정된다.
-* 사용자 정의 프롬프트는 데이터 폴더에 userpromt.json 이름의 파일로 저장된다.
-* 사용자 정의 프롬프트 파일에는 PDF 문서 요약을 위한 프롬프트와 사용자 질의응답에서 자주 사용하는 질문들이 포함된다.
+#### 2. Run the Frontend Development Server
+
+In a separate terminal, navigate to the `client` directory (`pdfman/client/`):
+
+```bash
+npm run dev
+```
+
+This will start the React development server, typically on `http://localhost:5173`. Open your browser to this address to access the web UI.
+
+#### 3. Run the Electron Desktop Application (Development)
+
+After starting the backend server, you can run the Electron app in development mode from the project root directory (`pdfman/`):
+
+```bash
+npm run electron-dev
+```
+
+### Building the Electron Desktop Application
+
+To create a distributable desktop application, run the following command from the project root directory (`pdfman/`):
+
+```bash
+npm run build-electron
+```
+
+This command will first build the React frontend and then package the Electron application into an executable for your operating system in the `dist_electron` directory.

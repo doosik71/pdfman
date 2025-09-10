@@ -239,6 +239,68 @@ function initializeExpressApp() {
         }
     });
 
+    // --- PROMPT API ---
+    app.get('/api/prompts', async (req, res) => {
+        try {
+            const userPromptPath = path.join(dataDir, 'userprompt.json');
+            const prompts = JSON.parse(await fs.readFile(userPromptPath));
+            res.json(prompts);
+        } catch (err) {
+            if (err.code === 'ENOENT') return res.json({}); // Return empty if file not found
+            res.status(500).send('Error reading prompts.');
+        }
+    });
+
+    app.post('/api/prompts', async (req, res) => {
+        const { key, content } = req.body;
+        if (!key || !content) return res.status(400).send('Key and content are required.');
+        try {
+            const userPromptPath = path.join(dataDir, 'userprompt.json');
+            let prompts = {};
+            try {
+                prompts = JSON.parse(await fs.readFile(userPromptPath));
+            } catch (e) { /* file might not exist, start with empty object */ }
+            prompts[key] = content;
+            await fs.writeFile(userPromptPath, JSON.stringify(prompts, null, 2));
+            res.status(201).send({ message: 'Prompt saved successfully.' });
+        } catch (err) {
+            res.status(500).send('Error saving prompt.');
+        }
+    });
+
+    app.put('/api/prompts/:promptKey', async (req, res) => {
+        const { promptKey } = req.params;
+        const { content } = req.body;
+        if (!content) return res.status(400).send('Content is required.');
+        try {
+            const userPromptPath = path.join(dataDir, 'userprompt.json');
+            let prompts = JSON.parse(await fs.readFile(userPromptPath));
+            if (!prompts[promptKey]) return res.status(404).send('Prompt not found.');
+            prompts[promptKey] = content;
+            await fs.writeFile(userPromptPath, JSON.stringify(prompts, null, 2));
+            res.send({ message: 'Prompt updated successfully.' });
+        } catch (err) {
+            res.status(500).send('Error updating prompt.');
+        }
+    });
+
+    app.delete('/api/prompts/:promptKey', async (req, res) => {
+        const { promptKey } = req.params;
+        if (promptKey === 'summarize') {
+            return res.status(403).send('The "summarize" prompt cannot be deleted.');
+        }
+        try {
+            const userPromptPath = path.join(dataDir, 'userprompt.json');
+            let prompts = JSON.parse(await fs.readFile(userPromptPath));
+            if (!prompts[promptKey]) return res.status(404).send('Prompt not found.');
+            delete prompts[promptKey];
+            await fs.writeFile(userPromptPath, JSON.stringify(prompts, null, 2));
+            res.send({ message: 'Prompt deleted successfully.' });
+        } catch (err) {
+            res.status(500).send('Error deleting prompt.');
+        }
+    });
+
     // --- SUMMARY API ---
     app.get('/api/summaries/:hash', async (req, res) => {
         const { hash } = req.params;

@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 
 /**
@@ -35,17 +34,25 @@ const EditDocumentForm = ({ doc, onSave, onCancel }) => {
 
   return (
     <form onSubmit={handleSubmit} style={{ background: '#f9f9f9', padding: '1rem', borderRadius: '8px' }}>
-      <label>Title:</label>
-      <input type="text" name="title" value={formData.title} onChange={handleChange} style={{ width: '95%', marginBottom: '0.5rem' }} />
+      <div style={{ marginBottom: '1rem' }}>
+        <label>Title:</label>
+        <input type="text" name="title" value={formData.title} onChange={handleChange} style={{ width: '100%', marginTop: '0.5rem' }} />
+      </div>
       
-      <label>Authors (comma-separated):</label>
-      <input type="text" name="authors" value={formData.authors} onChange={handleChange} style={{ width: '95%', marginBottom: '0.5rem' }} />
+      <div style={{ marginBottom: '1rem' }}>
+        <label>Authors (comma-separated):</label>
+        <input type="text" name="authors" value={formData.authors} onChange={handleChange} style={{ width: '100%', marginTop: '0.5rem' }} />
+      </div>
       
-      <label>Year:</label>
-      <input type="number" name="year" value={formData.year} onChange={handleChange} style={{ width: '95%', marginBottom: '0.5rem' }} />
+      <div style={{ marginBottom: '1rem' }}>
+        <label>Year:</label>
+        <input type="number" name="year" value={formData.year} onChange={handleChange} style={{ width: '100%', marginTop: '0.5rem' }} />
+      </div>
       
-      <label>Tags (comma-separated):</label>
-      <input type="text" name="tags" value={formData.tags} onChange={handleChange} style={{ width: '95%', marginBottom: '1rem' }} />
+      <div style={{ marginBottom: '1rem' }}>
+        <label>Tags (comma-separated):</label>
+        <input type="text" name="tags" value={formData.tags} onChange={handleChange} style={{ width: '100%', marginTop: '0.5rem' }} />
+      </div>
       
       <div>
         <button type="submit">Save</button>

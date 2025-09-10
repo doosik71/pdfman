@@ -1,4 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import ReactMarkdown from 'react-markdown';
+import { PanelGroup, Panel, PanelResizeHandle } from 'react-resizable-panels';
 
 const DocumentDetail = ({ docHash, onBack }) => {
   const [details, setDetails] = useState(null);
@@ -13,7 +15,6 @@ const DocumentDetail = ({ docHash, onBack }) => {
       setLoading(true);
       setError(null);
 
-      // Fetch document details and summary in parallel
       const [detailsRes, summaryRes] = await Promise.all([
         fetch(`http://localhost:3000/api/documents/${docHash}`),
         fetch(`http://localhost:3000/api/summaries/${docHash}`)
@@ -38,7 +39,7 @@ const DocumentDetail = ({ docHash, onBack }) => {
     } finally {
       setLoading(false);
     }
-  }, [docHash]);
+  }, [docHash, onBack]);
 
   useEffect(() => {
     fetchInitialData();
@@ -74,39 +75,45 @@ const DocumentDetail = ({ docHash, onBack }) => {
   };
 
   return (
-    <div>
-      <button onClick={onBack}>&larr; Back to Document List</button>
+    <div id="document-detail-header-area" style={{ display: 'flex', flexDirection: 'column' }}>
+      <button onClick={onBack} style={{ alignSelf: 'flex-start', flexShrink: 0 }}>&larr; Back to Document List</button>
       {loading && <p>Loading document details...</p>}
       {error && <p style={{ color: 'red' }}>Error: {error}</p>}
       {details && (
         <>
-          <h2>{details.title}</h2>
-          <div style={{ display: 'flex', height: '80vh', marginTop: '1rem' }}>
-            <div style={{ flex: 1, border: '1px solid #ccc', marginRight: '1rem' }}>
-              <embed
-                src={`http://localhost:3000/api/pdfs/${docHash}`}
-                type="application/pdf"
-                width="100%"
-                height="100%"
-              />
-            </div>
-            <div style={{ flex: 1, border: '1px solid #ccc', padding: '1rem', overflowY: 'auto' }}>
-              <h3>Metadata</h3>
-              <p><strong>Authors:</strong> {details.authors.join(', ') || 'N/A'}</p>
-              <p><strong>Year:</strong> {details.year || 'N/A'}</p>
-              <p><strong>Tags:</strong> {details.tags.join(', ') || 'N/A'}</p>
-              <hr />
-              <h3>AI Summary</h3>
-              {summaryExists && !isSummarizing ? (
-                <pre style={{ whiteSpace: 'pre-wrap', fontFamily: 'inherit' }}>{summary}</pre>
-              ) : (
-                <button onClick={handleSummarize} disabled={isSummarizing}>
-                  {isSummarizing ? 'Summarizing...' : 'Generate Summary'}
-                </button>
-              )}
-              {isSummarizing && <pre style={{ whiteSpace: 'pre-wrap', fontFamily: 'inherit' }}>{summary}</pre>}
-            </div>
-          </div>
+          <h2 style={{ flexShrink: 0 }}>{details.title}</h2>
+          <PanelGroup direction="horizontal" style={{ flexGrow: 1 }}>
+            <Panel defaultSize={50} minSize={20}>
+              <div style={{ flex: 1, border: '1px solid #ccc', marginRight: '1rem' }}>
+                <embed
+                  src={`http://localhost:3000/api/pdfs/${docHash}`}
+                  type="application/pdf"
+                  width="100%"
+                  height="100%"
+                />
+              </div>
+            </Panel>
+            <PanelResizeHandle style={{ width: '10px', background: '#ccc', cursor: 'ew-resize' }} />
+            <Panel defaultSize={50} minSize={20}>
+              <div id="document-summary-panel" style={{ flex: 1, border: '1px solid #ccc', padding: '1rem', overflowY: 'auto' }}>
+                <h3>Metadata</h3>
+                <p>
+                  <strong>Authors:</strong> {details.authors.join(', ') || 'N/A'}
+                  {details.year && ` • ${details.year}`}
+                </p>
+                <hr />
+                <h3>AI Summary</h3>
+                {summaryExists && !isSummarizing ? (
+                  <ReactMarkdown>{summary}</ReactMarkdown>
+                ) : (
+                  <button onClick={handleSummarize} disabled={isSummarizing}>
+                    {isSummarizing ? 'Summarizing...' : 'Generate Summary'}
+                  </button>
+                )}
+                {isSummarizing && <ReactMarkdown>{summary}</ReactMarkdown>}
+              </div>
+            </Panel>
+          </PanelGroup>
         </>
       )}
     </div>
