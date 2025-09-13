@@ -6,6 +6,7 @@ import ChatInput from '../components/ChatInput';
 import ChatDisplay from '../components/ChatDisplay';
 import remarkMath from 'remark-math';
 import rehypeMathjax from 'rehype-mathjax';
+import { API_BASE_URL } from '../api';
 
 const DocumentDetail = ({ docHash, onBack, onSetDocumentTitle }) => {
   const [details, setDetails] = useState(null);
@@ -25,8 +26,8 @@ const DocumentDetail = ({ docHash, onBack, onSetDocumentTitle }) => {
       setError(null);
 
       const [detailsRes, summaryRes] = await Promise.all([
-        fetch(`http://localhost:3000/api/documents/${docHash}`),
-        fetch(`http://localhost:3000/api/summaries/${docHash}`)
+        fetch(`${API_BASE_URL}/api/documents/${docHash}`),
+        fetch(`${API_BASE_URL}/api/summaries/${docHash}`)
       ]);
 
       if (!detailsRes.ok) {
@@ -63,7 +64,7 @@ const DocumentDetail = ({ docHash, onBack, onSetDocumentTitle }) => {
       setSummary('');
       setError(null);
 
-      const response = await fetch(`http://localhost:3000/api/summarize/${docHash}`, { method: 'POST' });
+      const response = await fetch(`${API_BASE_URL}/api/summarize/${docHash}`, { method: 'POST' });
       if (!response.ok) {
         const errorText = await response.text();
         throw new Error(errorText || `Failed to start summary stream: ${response.status}`);
@@ -93,7 +94,7 @@ const DocumentDetail = ({ docHash, onBack, onSetDocumentTitle }) => {
   const handleDeleteSummary = async () => {
     if (window.confirm('Are you sure you want to delete this summary?')) {
       try {
-        const response = await fetch(`http://localhost:3000/api/summaries/${docHash}`, {
+        const response = await fetch(`${API_BASE_URL}/api/summaries/${docHash}`, {
           method: 'DELETE',
         });
 
@@ -118,7 +119,7 @@ const DocumentDetail = ({ docHash, onBack, onSetDocumentTitle }) => {
     setIsChatting(true);
 
     try {
-      const response = await fetch(`http://localhost:3000/api/chat/${docHash}`, {
+      const response = await fetch(`${API_BASE_URL}/api/chat/${docHash}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ message: message }),
@@ -164,7 +165,7 @@ const DocumentDetail = ({ docHash, onBack, onSetDocumentTitle }) => {
 
   const handleSave = async (updatedDetails) => {
     try {
-      const response = await fetch(`http://localhost:3000/api/documents/${docHash}`, {
+      const response = await fetch(`${API_BASE_URL}/api/documents/${docHash}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(updatedDetails),
@@ -194,7 +195,7 @@ const DocumentDetail = ({ docHash, onBack, onSetDocumentTitle }) => {
                 height: '100%'
               }}>
                 <embed
-                  src={`http://localhost:3000/api/pdfs/${docHash}`}
+                  src={`${API_BASE_URL}/api/pdfs/${docHash}`}
                   type="application/pdf"
                   width="100%"
                   height="100%"

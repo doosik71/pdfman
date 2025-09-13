@@ -45,7 +45,7 @@ function checkEnvironmentVariables() {
 
 function initializeExpressApp() {
     const app = express();
-    app.use(cors({ origin: 'http://localhost:5173' }));
+    app.use(cors({ origin: 'http://localhost:9031' }));
     app.use(express.json());
     app.use(express.urlencoded({ extended: true }));
     app.use(express.static('public'));
@@ -440,7 +440,7 @@ function main() {
     }
     const app = initializeExpressApp();
     const server = http.createServer(app);
-    const port = process.env.PORT || 3000;
+    const port = process.env.PORT || 9030;
     server.listen(port, () => {
         console.log(`Server is running on http://localhost:${port}`);
     });

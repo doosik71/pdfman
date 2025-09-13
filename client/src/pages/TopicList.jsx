@@ -1,6 +1,6 @@
-
 import React, { useState, useEffect, useCallback } from 'react';
 import TopicCard from '../components/TopicCard';
+import { API_BASE_URL } from '../api';
 
 /**
  * A component to display and manage the list of topics.
@@ -17,7 +17,7 @@ const TopicList = ({ onNavigate }) => {
   const fetchTopics = useCallback(async () => {
     try {
       setLoading(true);
-      const response = await fetch('http://localhost:3000/api/topics');
+      const response = await fetch(`${API_BASE_URL}/api/topics`);
       if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
       const data = await response.json();
       setTopics(data);
@@ -37,7 +37,7 @@ const TopicList = ({ onNavigate }) => {
     e.preventDefault();
     if (!newTopicName.trim()) return;
     try {
-      const response = await fetch('http://localhost:3000/api/topics', {
+      const response = await fetch(`${API_BASE_URL}/api/topics`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ topicName: newTopicName }),
@@ -56,7 +56,7 @@ const TopicList = ({ onNavigate }) => {
   const handleDeleteTopic = async (topicName) => {
     if (!window.confirm(`Are you sure you want to delete the topic "${topicName}"?`)) return;
     try {
-      const response = await fetch(`http://localhost:3000/api/topics/${topicName}`, { method: 'DELETE' });
+      const response = await fetch(`${API_BASE_URL}/api/topics/${topicName}`, { method: 'DELETE' });
       if (!response.ok) {
         const errorData = await response.text();
         throw new Error(errorData || `Failed to delete topic. Status: ${response.status}`);

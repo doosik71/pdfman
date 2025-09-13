@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import EditDocumentForm from '../components/EditDocumentForm';
 import DocumentDetail from './DocumentDetail';
+import { API_BASE_URL } from '../api';
 
 const DocumentList = ({ topicName, onBackToTopics, onSetDocumentTitle, onTopicNameChange }) => {
   const [documents, setDocuments] = useState([]);
@@ -24,7 +25,7 @@ const DocumentList = ({ topicName, onBackToTopics, onSetDocumentTitle, onTopicNa
       if (topicName && !selectedDocHash) {
         try {
           setLoading(true);
-          const response = await fetch(`http://localhost:3000/api/topics/${topicName}/documents`);
+          const response = await fetch(`${API_BASE_URL}/api/topics/${topicName}/documents`);
           if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
           const data = await response.json();
           setDocuments(data);
@@ -52,7 +53,7 @@ const DocumentList = ({ topicName, onBackToTopics, onSetDocumentTitle, onTopicNa
     try {
       setError(null);
       setLoading(true);
-      const response = await fetch(`http://localhost:3000/api/topics/${topicName}/documents/upload`, { method: 'POST', body: formData });
+      const response = await fetch(`${API_BASE_URL}/api/topics/${topicName}/documents/upload`, { method: 'POST', body: formData });
       if (!response.ok) {
         const errorData = await response.text();
         throw new Error(errorData || `File upload failed. Status: ${response.status}`);
@@ -63,7 +64,7 @@ const DocumentList = ({ topicName, onBackToTopics, onSetDocumentTitle, onTopicNa
       const reFetchDocuments = async () => {
         try {
           setLoading(true);
-          const response = await fetch(`http://localhost:3000/api/topics/${topicName}/documents`);
+          const response = await fetch(`${API_BASE_URL}/api/topics/${topicName}/documents`);
           if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
           const data = await response.json();
           setDocuments(data);
@@ -88,7 +89,7 @@ const DocumentList = ({ topicName, onBackToTopics, onSetDocumentTitle, onTopicNa
     try {
       setError(null);
       setLoading(true);
-      const response = await fetch(`http://localhost:3000/api/topics/${topicName}/documents/url`, {
+      const response = await fetch(`${API_BASE_URL}/api/topics/${topicName}/documents/url`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ url: pdfUrl }),
@@ -102,7 +103,7 @@ const DocumentList = ({ topicName, onBackToTopics, onSetDocumentTitle, onTopicNa
       const reFetchDocuments = async () => {
         try {
           setLoading(true);
-          const response = await fetch(`http://localhost:3000/api/topics/${topicName}/documents`);
+          const response = await fetch(`${API_BASE_URL}/api/topics/${topicName}/documents`);
           if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
           const data = await response.json();
           setDocuments(data);
@@ -126,7 +127,7 @@ const DocumentList = ({ topicName, onBackToTopics, onSetDocumentTitle, onTopicNa
     try {
       setError(null);
       setLoading(true);
-      const response = await fetch(`http://localhost:3000/api/documents/${hash}`, { method: 'DELETE' });
+      const response = await fetch(`${API_BASE_URL}/api/documents/${hash}`, { method: 'DELETE' });
       if (!response.ok) {
         const errorData = await response.text();
         throw new Error(errorData || `Failed to delete document. Status: ${response.status}`);
@@ -135,7 +136,7 @@ const DocumentList = ({ topicName, onBackToTopics, onSetDocumentTitle, onTopicNa
       const reFetchDocuments = async () => {
         try {
           setLoading(true);
-          const response = await fetch(`http://localhost:3000/api/topics/${topicName}/documents`);
+          const response = await fetch(`${API_BASE_URL}/api/topics/${topicName}/documents`);
           if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
           const data = await response.json();
           setDocuments(data);
@@ -158,7 +159,7 @@ const DocumentList = ({ topicName, onBackToTopics, onSetDocumentTitle, onTopicNa
     try {
       setError(null);
       setLoading(true);
-      const response = await fetch(`http://localhost:3000/api/documents/${hash}`, {
+      const response = await fetch(`${API_BASE_URL}/api/documents/${hash}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(updatedData),
@@ -172,7 +173,7 @@ const DocumentList = ({ topicName, onBackToTopics, onSetDocumentTitle, onTopicNa
       const reFetchDocuments = async () => {
         try {
           setLoading(true);
-          const response = await fetch(`http://localhost:3000/api/topics/${topicName}/documents`);
+          const response = await fetch(`${API_BASE_URL}/api/topics/${topicName}/documents`);
           if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
           const data = await response.json();
           setDocuments(data);
@@ -203,7 +204,7 @@ const DocumentList = ({ topicName, onBackToTopics, onSetDocumentTitle, onTopicNa
     }
     try {
       setError(null);
-      const response = await fetch(`http://localhost:3000/api/topics/${topicName}`,
+      const response = await fetch(`${API_BASE_URL}/api/topics/${topicName}`,
         {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },

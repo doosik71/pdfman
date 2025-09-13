@@ -1,5 +1,5 @@
-
 import React, { useState, useEffect, useCallback } from 'react';
+import { API_BASE_URL } from '../api';
 
 const Settings = () => {
   const [settings, setSettings] = useState({ data_folder: '', gemini_api_key: '' });
@@ -15,7 +15,7 @@ const Settings = () => {
   const fetchSettings = useCallback(async () => {
     try {
       setLoading(true);
-      const response = await fetch('http://localhost:3000/api/settings');
+      const response = await fetch(`${API_BASE_URL}/api/settings`);
       if (!response.ok) throw new Error('Failed to fetch settings.');
       const data = await response.json();
       setSettings(data);
@@ -28,7 +28,7 @@ const Settings = () => {
 
   const fetchPrompts = useCallback(async () => {
     try {
-      const response = await fetch('http://localhost:3000/api/prompts');
+      const response = await fetch(`${API_BASE_URL}/api/prompts`);
       if (!response.ok) throw new Error('Failed to fetch prompts.');
       const data = await response.json();
       setPrompts(data);
@@ -52,7 +52,7 @@ const Settings = () => {
     }
     try {
       setError(null);
-      const response = await fetch('http://localhost:3000/api/prompts', {
+      const response = await fetch(`${API_BASE_URL}/api/prompts`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ key: newPromptKey, content: newPromptContent }),
@@ -82,7 +82,7 @@ const Settings = () => {
     }
     try {
       setError(null);
-      const response = await fetch(`http://localhost:3000/api/prompts/${editingPromptKey}`, {
+      const response = await fetch(`${API_BASE_URL}/api/prompts/${editingPromptKey}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ content: editingPromptContent }),
@@ -105,7 +105,7 @@ const Settings = () => {
     }
     try {
       setError(null);
-      const response = await fetch(`http://localhost:3000/api/prompts/${key}`, {
+      const response = await fetch(`${API_BASE_URL}/api/prompts/${key}`, {
         method: 'DELETE',
       });
       if (!response.ok) {
