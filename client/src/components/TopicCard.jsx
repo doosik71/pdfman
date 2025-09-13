@@ -32,16 +32,16 @@ const TopicCard = ({ topic, onDelete, onSelect }) => {
   const deleteButtonStyle = {
     display: isCardHovered ? 'block' : 'none',
     position: 'absolute',
-    top: '0.5rem',
-    right: '0.5rem',
-    background: 'none',
+    top: '0.3rem',
+    right: '0.2rem',
+    background: isButtonHovered ? '#e53e3e' : 'none',
     border: 'none',
-    color: isButtonHovered ? '#e53e3e' : '#aaa', // Red on hover, gray otherwise
+    color: isButtonHovered ? '#fff' : '#aaa', // White on hover, gray otherwise
     cursor: 'pointer',
-    fontSize: '1.2rem',
-    padding: '0.25rem',
+    fontSize: '0.8rem',
+    padding: '0.1rem',
     lineHeight: 1,
-    transition: 'color 0.2s ease-in-out',
+    transition: 'color 0.2s ease-in-out, background-color 0.2s ease-in-out',
   };
 
   const titleStyle = {

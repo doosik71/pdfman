@@ -62,3 +62,22 @@ p {
   margin-top: 0;
   margin-bottom: 0.5rem;
 }
+
+/* Styles for Markdown code blocks in summary */
+#document-summary-panel pre {
+  background-color: #f6f8fa; /* A light gray, common for code blocks */
+  padding: 0.5rem;
+  border-radius: 6px;
+  overflow-x: auto;
+}
+
+#document-summary-panel code {
+  font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, Courier, monospace;
+}
+
+/* Style for inline code */
+#document-summary-panel :not(pre) > code {
+  background-color: rgba(175, 184, 193, 0.2);
+  padding: 0.1em;
+  border-radius: 6px;
+}

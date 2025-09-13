@@ -365,7 +365,7 @@ const DocumentList = ({ topicName, onBackToTopics, onSetDocumentTitle, onTopicNa
           <span>Add from URL:</span>
           <form onSubmit={handleAddFromUrlSubmit}>
             <input type="url" value={pdfUrl} onChange={(e) => setPdfUrl(e.target.value)} placeholder="https://example.com/document.pdf" style={{ width: '250px' }} />
-            <button type="submit" disabled={!pdfUrl || loading} style={{ padding: '0.25rem 0.5rem' }}>Add from URL</button>
+            <button type="submit" disabled={!pdfUrl || loading} style={{ marginLeft: '1rem', padding: '0.25rem 0.5rem' }}>Add from URL</button>
           </form>
         </div>
       </div>

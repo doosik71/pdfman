@@ -16,7 +16,7 @@ const EditDocumentDetailForm = ({ doc, onSave, onCancel }) => {
   };
 
   return (
-    <form onSubmit={handleSubmit}>
+    <form onSubmit={handleSubmit} style={{ padding: '0.5rem' }}>
       <div style={{ display: 'flex', alignItems: 'center', marginBottom: '0.5rem' }}>
         <label style={{ width: '80px', textAlign: 'right', marginRight: "0.5em", flexShrink: 0 }}>Title:</label>
         <input type="text" value={title} onChange={(e) => setTitle(e.target.value)} style={{ flex: 1, boxSizing: 'border-box' }} />
@@ -29,7 +29,7 @@ const EditDocumentDetailForm = ({ doc, onSave, onCancel }) => {
         <label style={{ width: '80px', textAlign: 'right', marginRight: "0.5em", flexShrink: 0 }}>Year:</label>
         <input type="number" value={year} onChange={(e) => setYear(e.target.value)} />
       </div>
-      <div style={{ marginTop: '1rem', textAlign: 'center' }}>
+      <div style={{ textAlign: 'center' }}>
         <button type="submit" style={{ padding: '0.25rem 0.5rem' }}>Save</button>
         <button type="button" onClick={onCancel} style={{ marginLeft: '0.5rem', padding: '0.25rem 0.5rem' }}>Cancel</button>
       </div>
