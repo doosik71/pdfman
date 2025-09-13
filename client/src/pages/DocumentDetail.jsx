@@ -1,6 +1,9 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import ReactMarkdown from 'react-markdown';
 import { PanelGroup, Panel, PanelResizeHandle } from 'react-resizable-panels';
+import EditDocumentDetailForm from '../components/EditDocumentDetailForm';
+import remarkMath from 'remark-math';
+import rehypeMathjax from 'rehype-mathjax';
 
 const DocumentDetail = ({ docHash, onBack, onSetDocumentTitle }) => {
   const [details, setDetails] = useState(null);
@@ -9,6 +12,7 @@ const DocumentDetail = ({ docHash, onBack, onSetDocumentTitle }) => {
   const [isSummarizing, setIsSummarizing] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [isEditing, setIsEditing] = useState(false);
 
   const fetchInitialData = useCallback(async () => {
     try {
@@ -55,7 +59,11 @@ const DocumentDetail = ({ docHash, onBack, onSetDocumentTitle }) => {
       setError(null);
 
       const response = await fetch(`http://localhost:3000/api/summarize/${docHash}`, { method: 'POST' });
-      if (!response.ok || !response.body) {
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(errorText || `Failed to start summary stream: ${response.status}`);
+      }
+      if (!response.body) {
         throw new Error(`Failed to start summary stream: ${response.status}`);
       }
 
@@ -98,6 +106,23 @@ const DocumentDetail = ({ docHash, onBack, onSetDocumentTitle }) => {
     }
   };
 
+  const handleSave = async (updatedDetails) => {
+    try {
+      const response = await fetch(`http://localhost:3000/api/documents/${docHash}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updatedDetails),
+      });
+      if (!response.ok) {
+        throw new Error('Failed to save document details');
+      }
+      setDetails(updatedDetails);
+      setIsEditing(false);
+    } catch (error) {
+      setError(error.message);
+    }
+  };
+
   return (
     <div id="document-detail-area" style={{ display: 'flex', flexDirection: 'column', height: 'calc(100vh - 62px)' }}>
       <button onClick={onBack} style={{ alignSelf: 'flex-start', flexShrink: 0 }}>&larr; Back to Document List</button>
@@ -129,10 +154,20 @@ const DocumentDetail = ({ docHash, onBack, onSetDocumentTitle }) => {
                 height: '100%',
                 overflowY: 'auto'
               }}>
-                <p>
-                  <strong>Authors:</strong> {details.authors.join(', ') || 'N/A'}
-                  {details.year && ` • ${details.year}`}
-                </p>
+                {isEditing ? (
+                  <EditDocumentDetailForm doc={details} onSave={handleSave} onCancel={() => setIsEditing(false)} />
+                ) : (
+                  <>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <h3>{details.title}</h3>
+                      <button onClick={() => setIsEditing(true)}>Edit</button>
+                    </div>
+                    <p>
+                      <strong>Authors:</strong> {details.authors.join(', ') || 'N/A'}
+                      {details.year && ` • ${details.year}`}
+                    </p>
+                  </>
+                )}
                 <hr />
                 <h3 style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   AI Summary
@@ -143,11 +178,13 @@ const DocumentDetail = ({ docHash, onBack, onSetDocumentTitle }) => {
                   )}
                 </h3>
                 {summaryExists && !isSummarizing ? (
-                  <ReactMarkdown>{summary}</ReactMarkdown>
+                  <ReactMarkdown remarkPlugins={[remarkMath]} rehypePlugins={[rehypeMathjax]}>{summary}</ReactMarkdown>
                 ) : (
-                  <button onClick={handleSummarize} disabled={isSummarizing}>
-                    {isSummarizing ? 'Summarizing...' : 'Generate Summary'}
-                  </button>
+                  <div style={{ textAlign: 'center' }}>
+                    <button onClick={handleSummarize} disabled={isSummarizing}>
+                      {isSummarizing ? 'Summarizing...' : 'Generate Summary'}
+                    </button>
+                  </div>
                 )}
                 {isSummarizing && <ReactMarkdown>{summary}</ReactMarkdown>}
               </div>

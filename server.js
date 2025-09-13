@@ -138,7 +138,7 @@ function initializeExpressApp() {
         if (!docInfo) return res.status(404).send('Document not found.');
         try {
             const pdfPath = docInfo.filePath.replace(/\.json$/, '.pdf');
-            res.sendFile(pdfPath);
+            res.sendFile(path.resolve(pdfPath));
         } catch (err) {
             console.error(err);
             res.status(500).send('Error sending PDF file.');
@@ -331,7 +331,16 @@ function initializeExpressApp() {
             const pdfPath = path.join(path.dirname(docInfo.filePath), `${hash}.pdf`);
             const pdfData = await fs.readFile(pdfPath);
             const pdfText = (await pdf(pdfData)).text;
-            const prompts = JSON.parse(await fs.readFile(path.join(__dirname, 'data', 'userprompt.json')));
+            let prompts;
+            try {
+                prompts = JSON.parse(await fs.readFile(path.join(dataDir, 'userprompt.json')));
+            } catch (promptError) {
+                if (promptError.code === 'ENOENT') {
+                    return res.status(404).send('userprompt.json not found. Please create it in your data directory.');
+                }
+                console.error("Summarization error:", promptError);
+                return res.status(500).send("Failed to read prompts.");
+            }
             const prompt = prompts.summarize.replace('{context}', pdfText);
             const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
             const result = await model.generateContentStream(prompt);

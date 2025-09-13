@@ -26,7 +26,7 @@ const TopicCard = ({ topic, onDelete, onSelect }) => {
   };
 
   return (
-    <div key={topic.name} style={{ position: 'relative', border: '1px solid #ccc', padding: '0.5rem 0.75rem', borderRadius: '8px', flex: '0 0 200px', maxWidth: 'calc(100% - 1rem)' }}>
+    <div key={topic.name} style={{ position: 'relative', border: '1px solid #ccc', padding: '0.5rem 0.75rem', borderRadius: '8px', flex: '0 0 200px', maxWidth: 'calc(100% - 1rem)', minHeight: '4em' }}>
       <button 
         onClick={(e) => { e.stopPropagation(); onDelete(topic.name); }}
         onMouseEnter={() => setIsHovered(true)}

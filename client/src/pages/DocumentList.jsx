@@ -223,43 +223,6 @@ const DocumentList = ({ topicName, onBackToTopics, onSetDocumentTitle }) => {
       <div>
         <button onClick={onBackToTopics} style={{ padding: '0.25rem 0.5rem', flexShrink: 0 }}>&larr; Back to Topics</button>
       </div>
-      {/* Forms for adding documents */}
-      <div style={{ display: 'flex', gap: '1rem', flexShrink: 0 }}>
-        <div
-          style={{
-            padding: '0.5rem',
-            border: isDraggingOver ? '2px dashed blue' : '1px solid #ccc',
-            borderRadius: '8px',
-            transition: 'border-color 0.2s ease-in-out',
-            flex: 1,
-          }}
-          onDragOver={handleDragOver}
-          onDragLeave={handleDragLeave}
-          onDrop={handleDrop}
-        >
-          <span>Upload New PDF:</span>
-          <form onSubmit={handleUploadSubmit}>
-            <input type="file" accept=".pdf" onChange={handleFileChange} />
-            <button type="submit" disabled={!selectedFile || loading} style={{ padding: '0.25rem 0.5rem' }}>Upload</button>
-            {selectedFile && <p>Selected: {selectedFile.name}</p>}
-          </form>
-        </div>
-        <div
-          style={{
-            padding: '0.5rem',
-            border: '1px solid #ccc',
-            borderRadius: '8px',
-            flex: 1,
-          }}
-        >
-          <span>Add from URL:</span>
-          <form onSubmit={handleAddFromUrlSubmit}>
-            <input type="url" value={pdfUrl} onChange={(e) => setPdfUrl(e.target.value)} placeholder="https://example.com/document.pdf" style={{ width: '250px' }} />
-            <button type="submit" disabled={!pdfUrl || loading} style={{ padding: '0.25rem 0.5rem' }}>Add from URL</button>
-          </form>
-        </div>
-      </div>
-
       {loading && <p>Loading...</p>}
       {error && <p style={{ color: 'red' }}>Error: {error}</p>}
 
@@ -299,10 +262,47 @@ const DocumentList = ({ topicName, onBackToTopics, onSetDocumentTitle }) => {
               ))}
             </ul>
           ) : (
-            <p>No documents found in this topic. Add one above!</p>
+            <p>No documents found in this topic. Add one below!</p>
           )}
         </>
       )}
+
+      {/* Forms for adding documents */}
+      <div style={{ display: 'flex', gap: '1rem', flexShrink: 0 }}>
+        <div
+          style={{
+            padding: '0.5rem',
+            border: isDraggingOver ? '2px dashed blue' : '1px solid #ccc',
+            borderRadius: '8px',
+            transition: 'border-color 0.2s ease-in-out',
+            flex: 1,
+          }}
+          onDragOver={handleDragOver}
+          onDragLeave={handleDragLeave}
+          onDrop={handleDrop}
+        >
+          <span>Upload New PDF:</span>
+          <form onSubmit={handleUploadSubmit}>
+            <input type="file" accept=".pdf" onChange={handleFileChange} />
+            <button type="submit" disabled={!selectedFile || loading} style={{ padding: '0.25rem 0.5rem' }}>Upload</button>
+            {selectedFile && <p>Selected: {selectedFile.name}</p>}
+          </form>
+        </div>
+        <div
+          style={{
+            padding: '0.5rem',
+            border: '1px solid #ccc',
+            borderRadius: '8px',
+            flex: 1,
+          }}
+        >
+          <span>Add from URL:</span>
+          <form onSubmit={handleAddFromUrlSubmit}>
+            <input type="url" value={pdfUrl} onChange={(e) => setPdfUrl(e.target.value)} placeholder="https://example.com/document.pdf" style={{ width: '250px' }} />
+            <button type="submit" disabled={!pdfUrl || loading} style={{ padding: '0.25rem 0.5rem' }}>Add from URL</button>
+          </form>
+        </div>
+      </div>
     </div>
   );
 };

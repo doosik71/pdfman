@@ -71,7 +71,7 @@ const TopicList = ({ onNavigate }) => {
     <div style={{ display: 'flex', flexDirection: 'column', flexGrow: 1, minHeight: 0 }}>
       {loading && <p>Loading topics...</p>}
       {error && <p style={{ color: 'red' }}>Error: {error}</p>}
-      <form onSubmit={handleCreateTopic} style={{ margin: '0 auto', maxWidth: '400px', width: '100%' }}>
+      <form onSubmit={handleCreateTopic} style={{ margin: '0 auto 1rem', maxWidth: '400px', width: '100%' }}>
         <input
           type="text"
           value={newTopicName}
@@ -79,10 +79,10 @@ const TopicList = ({ onNavigate }) => {
           placeholder="Enter new topic name"
           style={{ marginRight: '1rem' }}
         />
-        <button type="submit">Add Topic</button>
+        <button type="submit" style={{ padding: '0.25rem 0.5rem' }}>Add Topic</button>
       </form>
       {!loading && (
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem', flexGrow: 1, height: 0, overflowY: 'auto' }}>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem', alignContent: 'flex-start', justifyContent: 'center', overflowY: 'auto' }}>
           {topics.length > 0 ? (
             topics.map(topic => (
               <TopicCard 
