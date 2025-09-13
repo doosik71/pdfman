@@ -49,7 +49,7 @@ const TopicList = ({ onNavigate }) => {
       setNewTopicName('');
       await fetchTopics();
     } catch (err) {
-      setError(err.message);
+      window.alert(err.message);
     }
   };
 
@@ -63,7 +63,7 @@ const TopicList = ({ onNavigate }) => {
       }
       await fetchTopics();
     } catch (err) {
-      setError(err.message);
+      window.alert(err.message);
     }
   };
 

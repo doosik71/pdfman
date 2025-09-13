@@ -96,6 +96,38 @@ function initializeExpressApp() {
         } catch (err) { res.status(500).send('Error deleting topic.'); }
     });
 
+    app.put('/api/topics/:topicName', async (req, res) => {
+        const { topicName } = req.params;
+        const { newName } = req.body;
+
+        if (!newName || /[/\\?%*:|"<>\x00]/.test(newName) || newName.includes('..')) {
+            return res.status(400).send('Invalid new topic name.');
+        }
+
+        const oldPath = path.join(dataDir, topicName);
+        const newPath = path.join(dataDir, newName);
+
+        try {
+            // Check if new topic name already exists
+            try {
+                await fs.access(newPath);
+                return res.status(409).send('A topic with this name already exists.');
+            } catch (e) {
+                // New path does not exist, which is good
+            }
+
+            // Check if old topic exists and rename it
+            await fs.rename(oldPath, newPath);
+            res.send({ message: 'Topic renamed successfully.' });
+        } catch (err) {
+            if (err.code === 'ENOENT') {
+                return res.status(404).send('Original topic not found.');
+            }
+            console.error('Error renaming topic:', err);
+            res.status(500).send('Error renaming topic.');
+        }
+    });
+
     // --- DOCUMENT API ---
     app.get('/api/topics/:topicName/documents', async (req, res) => {
         const { topicName } = req.params;

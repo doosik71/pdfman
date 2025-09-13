@@ -180,8 +180,8 @@ const DocumentDetail = ({ docHash, onBack, onSetDocumentTitle }) => {
   };
 
   return (
-    <div id="document-detail-area" style={{ display: 'flex', flexDirection: 'column', height: 'calc(100vh - 62px)' }}>
-      <button onClick={onBack} style={{ alignSelf: 'flex-start', flexShrink: 0 }}>&larr; Back to Document List</button>
+    <div id="document-detail-area" style={{ display: 'flex', flexDirection: 'column', height: 'calc(100vh - 16px)' }}>
+      <button onClick={onBack} style={{ alignSelf: 'flex-start', padding: '0.25rem 0.5rem', marginLeft: '1em', marginBottom: '0.5em', flexShrink: 0 }}>&larr; Back to Document List</button>
       {loading && <p>Loading document details...</p>}
       {error && <p style={{ color: 'red' }}>Error: {error}</p>}
       {details && (
@@ -223,7 +223,7 @@ const DocumentDetail = ({ docHash, onBack, onSetDocumentTitle }) => {
                 display: 'flex',
                 flexDirection: 'column',
                 border: '1px solid #ccc',
-                padding: '1rem',
+                // padding: '1rem',
                 height: '100%',
                 overflowY: 'auto'
               }}>
@@ -231,18 +231,19 @@ const DocumentDetail = ({ docHash, onBack, onSetDocumentTitle }) => {
                   <EditDocumentDetailForm doc={details} onSave={handleSave} onCancel={() => setIsEditing(false)} />
                 ) : (
                   <>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <h3>{details.title}</h3>
-                      <button onClick={() => setIsEditing(true)}>Edit</button>
+                    <div style={{ padding: '0.5rem' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <h3>{details.title}</h3>
+                        <button onClick={() => setIsEditing(true)}>Edit</button>
+                      </div>
+                      <p>
+                        {details.authors.join(', ')}
+                        {details.year && ` (${details.year})`}
+                      </p>
                     </div>
-                    <p>
-                      <strong>Authors:</strong> {details.authors.join(', ') || 'N/A'}
-                      {details.year && ` • ${details.year}`}
-                    </p>
                   </>
                 )}
-                <hr />
-                <div style={{ display: 'flex', borderBottom: '1px solid #ccc', marginBottom: '1rem' }}>
+                <div style={{ display: 'flex', borderBottom: '1px solid #ccc' }}>
                   <button
                     onClick={() => setActiveTab('summary')}
                     style={{
@@ -281,43 +282,45 @@ const DocumentDetail = ({ docHash, onBack, onSetDocumentTitle }) => {
                   </button>
                 </div>
 
-                {activeTab === 'summary' && (
-                  <div style={{ flexGrow: 1, overflowY: 'auto' }}>
-                    <h3 style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      AI Summary
-                      {summaryExists && !isSummarizing && (
-                        <button onClick={handleDeleteSummary} style={{ fontSize: '0.8em', padding: '0.3em 0.6em' }}>
-                          Delete Summary
-                        </button>
+                <div style={{ display: 'flex', flexGrow: 1, padding: '0.5rem 1rem' }}>
+                  {activeTab === 'summary' && (
+                    <div style={{ flexGrow: 1, overflowY: 'auto' }}>
+                      <h3 style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        AI Summary
+                        {summaryExists && !isSummarizing && (
+                          <button onClick={handleDeleteSummary} style={{ fontSize: '0.8em', padding: '0.3em 0.6em' }}>
+                            Delete Summary
+                          </button>
+                        )}
+                      </h3>
+                      {summaryExists && !isSummarizing ? (
+                        <ReactMarkdown remarkPlugins={[remarkMath]} rehypePlugins={[rehypeMathjax]}>{summary}</ReactMarkdown>
+                      ) : (
+                        <div style={{ textAlign: 'center' }}>
+                          <button onClick={handleSummarize} disabled={isSummarizing}>
+                            {isSummarizing ? 'Summarizing...' : 'Generate Summary'}
+                          </button>
+                        </div>
                       )}
-                    </h3>
-                    {summaryExists && !isSummarizing ? (
-                      <ReactMarkdown remarkPlugins={[remarkMath]} rehypePlugins={[rehypeMathjax]}>{summary}</ReactMarkdown>
-                    ) : (
-                      <div style={{ textAlign: 'center' }}>
-                        <button onClick={handleSummarize} disabled={isSummarizing}>
-                          {isSummarizing ? 'Summarizing...' : 'Generate Summary'}
-                        </button>
-                      </div>
-                    )}
-                    {isSummarizing && <ReactMarkdown>{summary}</ReactMarkdown>}
-                  </div>
-                )}
+                      {isSummarizing && <ReactMarkdown>{summary}</ReactMarkdown>}
+                    </div>
+                  )}
 
-                {activeTab === 'chat' && (
-                  <div style={{ flexGrow: 1, display: 'flex', flexDirection: 'column', overflowY: 'auto' }}>
-                    <h3 style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      AI Chat
-                      {chatMessages.length > 0 && (
-                        <button onClick={handleClearChat} style={{ fontSize: '0.8em', padding: '0.3em 0.6em' }}>
-                          Clear Chat
-                        </button>
-                      )}
-                    </h3>
-                    <ChatDisplay messages={chatMessages} />
-                    <ChatInput onSendMessage={handleSendMessage} isChatting={isChatting} />
-                  </div>
-                )}
+                  {activeTab === 'chat' && (
+                    <div style={{ flexGrow: 1, display: 'flex', flexDirection: 'column', overflowY: 'auto' }}>
+                      <h3 style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        AI Chat
+                        {chatMessages.length > 0 && (
+                          <button onClick={handleClearChat} style={{ fontSize: '0.8em', padding: '0.3em 0.6em' }}>
+                            Clear Chat
+                          </button>
+                        )}
+                      </h3>
+                      <ChatDisplay messages={chatMessages} />
+                      <ChatInput onSendMessage={handleSendMessage} isChatting={isChatting} />
+                    </div>
+                  )}
+                </div>
               </div>
             </Panel>
           </PanelGroup>

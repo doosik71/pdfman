@@ -124,7 +124,7 @@ const Settings = () => {
     <div style={{ padding: '0 0.5em' }}>
       {error && <p style={{ color: 'red' }}>Error: {error}</p>}
       
-      <h2>General Settings</h2>
+      <h2 style={{ marginLeft: '0.5rem', marginTop: '0.3rem' }}>General Settings</h2>
       <div style={{ marginBottom: '1rem' }}>
         <label>Data Folder Path:</label>
         <input 
@@ -146,35 +146,9 @@ const Settings = () => {
         />
       </div>
 
-      <hr style={{ margin: '2rem 0' }} />
-
-      <h2>Custom Prompts</h2>
-      <form onSubmit={handleAddPrompt}>
-        <div style={{ marginBottom: '1rem' }}>
-          <label>Prompt Key:</label>
-          <input 
-            type="text" 
-            value={newPromptKey}
-            onChange={(e) => setNewPromptKey(e.target.value)}
-            placeholder="e.g., summarize, chat_response"
-            style={{ width: '100%', marginTop: '0.5rem' }}
-          />
-        </div>
-        <div style={{ marginBottom: '1rem' }}>
-          <label>Prompt Content:</label>
-          <textarea 
-            value={newPromptContent}
-            onChange={(e) => setNewPromptContent(e.target.value)}
-            placeholder="e.g., Summarize the following: {context}"
-            rows="5"
-            style={{ width: '100%', marginTop: '0.5rem' }}
-          ></textarea>
-        </div>
-        <button type="submit">Add Prompt</button>
-      </form>
-
-      <div style={{ marginTop: '2rem' }}>
-        <h4>Existing Prompts</h4>
+      <h2 style={{ marginLeft: '0.5rem', marginTop: '0.3rem' }}>Custom Prompts</h2>
+      <div>
+        <h3 style={{ marginLeft: '0.5rem' }}>Existing Prompts</h3>
         {Object.keys(prompts).length === 0 ? (
           <p>No custom prompts defined.</p>
         ) : (
@@ -208,6 +182,30 @@ const Settings = () => {
           </ul>
         )}
       </div>
+      <form onSubmit={handleAddPrompt} style={{ marginBottom: '1rem' }}>
+        <h3 style={{ marginLeft: '0.5rem' }}>New Prompt</h3>
+        <div style={{ marginBottom: '1rem' }}>
+          <label>Prompt Key:</label>
+          <input 
+            type="text" 
+            value={newPromptKey}
+            onChange={(e) => setNewPromptKey(e.target.value)}
+            placeholder="e.g., summarize, chat_response"
+            style={{ width: '100%', marginTop: '0.5rem' }}
+          />
+        </div>
+        <div style={{ marginBottom: '1rem' }}>
+          <label>Prompt Content:</label>
+          <textarea 
+            value={newPromptContent}
+            onChange={(e) => setNewPromptContent(e.target.value)}
+            placeholder="e.g., Summarize the following: {context}"
+            rows="5"
+            style={{ width: '100%', marginTop: '0.5rem' }}
+          ></textarea>
+        </div>
+        <button type="submit">Add Prompt</button>
+      </form>
     </div>
   );
 };

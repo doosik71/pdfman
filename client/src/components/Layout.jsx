@@ -32,7 +32,7 @@ const Layout = ({ children, onNavigate, isSidebarOpen, toggleSidebar, headerProp
         <h2>PDFMan</h2>
         <nav>
           <ul style={{ listStyle: 'none', padding: 0 }}>
-            <li style={{ marginBottom: '1rem' }}>
+            <li style={{ marginBottom: '0.5rem' }}>
               <a href="#" onClick={(e) => { e.preventDefault(); onNavigate('topics'); }}>
                 Topics
               </a>
@@ -50,15 +50,22 @@ const Layout = ({ children, onNavigate, isSidebarOpen, toggleSidebar, headerProp
         onClick={toggleSidebar}
         style={{
           position: 'absolute',
-          top: '0.5rem',
-          left: isSidebarOpen ? '205px' : '5px', // Adjust position based on sidebar state
-          background: '#eee',
-          border: '1px solid #ccc',
-          padding: '0.25rem 0.5rem',
+          top: '0.8rem',
+          left: isSidebarOpen ? '188px' : '-12px',
+          background: 'gray',
+          color: 'white',
+          border: 'none',
+          borderRadius: '50%',
+          outline: 'none',
+          width: '23px',
+          height: '23px',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
           cursor: 'pointer',
-          fontSize: '0.8rem',
-          zIndex: 10, // Ensure it's above other content
-          transition: 'left 0.3s ease-in-out',
+          fontSize: '0.5rem',
+          zIndex: 1000,
+          transition: 'left 0.3s ease-in-out, background-color 0.2s'
         }}
       >
         {isSidebarOpen ? '<' : '>'}

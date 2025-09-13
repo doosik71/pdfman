@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import EditDocumentForm from '../components/EditDocumentForm';
 import DocumentDetail from './DocumentDetail';
 
-const DocumentList = ({ topicName, onBackToTopics, onSetDocumentTitle }) => {
+const DocumentList = ({ topicName, onBackToTopics, onSetDocumentTitle, onTopicNameChange }) => {
   const [documents, setDocuments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -11,6 +11,8 @@ const DocumentList = ({ topicName, onBackToTopics, onSetDocumentTitle }) => {
   const [editingDocHash, setEditingDocHash] = useState(null);
   const [selectedDocHash, setSelectedDocHash] = useState(null);
   const [isDraggingOver, setIsDraggingOver] = useState(false);
+  const [isEditingTopic, setIsEditingTopic] = useState(false);
+  const [newTopicName, setNewTopicName] = useState(topicName);
 
   const memoizedOnBackToDocumentList = useCallback(() => {
     setSelectedDocHash(null);
@@ -189,6 +191,35 @@ const DocumentList = ({ topicName, onBackToTopics, onSetDocumentTitle }) => {
     }
   };
 
+  const handleUpdateTopicName = async () => {
+    const invalidChars = /[/\\?%*:|"<>.\\]/;
+    if (invalidChars.test(newTopicName)) {
+      setError('Topic name contains invalid characters.');
+      return;
+    }
+    if (newTopicName === topicName) {
+      setIsEditingTopic(false);
+      return;
+    }
+    try {
+      setError(null);
+      const response = await fetch(`http://localhost:3000/api/topics/${topicName}`,
+        {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ newName: newTopicName }),
+        });
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(errorText || 'Failed to rename topic.');
+      }
+      onTopicNameChange(newTopicName);
+      setIsEditingTopic(false);
+    } catch (err) {
+      setError(err.message);
+    }
+  };
+
   const handleDragOver = (e) => {
     e.preventDefault();
     setIsDraggingOver(true);
@@ -221,8 +252,27 @@ const DocumentList = ({ topicName, onBackToTopics, onSetDocumentTitle }) => {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', flexGrow: 1 }}>
       <div>
-        <button onClick={onBackToTopics} style={{ padding: '0.25rem 0.5rem', flexShrink: 0 }}>&larr; Back to Topics</button>
+        <button onClick={onBackToTopics} style={{ padding: '0.25rem 0.5rem', marginLeft: '1em', flexShrink: 0 }}>&larr; Back to Topics</button>
       </div>
+
+      {isEditingTopic ? (
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', margin: '1rem 0' }}>
+          <input
+            type="text"
+            value={newTopicName}
+            onChange={(e) => setNewTopicName(e.target.value)}
+            style={{ fontSize: '1.5rem' }}
+          />
+          <button onClick={handleUpdateTopicName} style={{ padding: '0.25rem 0.5rem' }}>Save</button>
+          <button onClick={() => { setIsEditingTopic(false); setError(null); }} style={{ padding: '0.25rem 0.5rem' }}>Cancel</button>
+        </div>
+      ) : (
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', margin: '0.5rem 0' }}>
+          <h2 style={{ margin: 0 }}>{topicName}</h2>
+          <button onClick={() => { setIsEditingTopic(true); setNewTopicName(topicName); }} style={{ padding: '0.25rem 0.5rem' }}>Edit</button>
+        </div>
+      )}
+
       {loading && <p>Loading...</p>}
       {error && <p style={{ color: 'red' }}>Error: {error}</p>}
 
@@ -234,6 +284,7 @@ const DocumentList = ({ topicName, onBackToTopics, onSetDocumentTitle }) => {
               padding: 0,
               flexGrow: 1,
               overflowY: 'auto',
+              margin: '0',
               height: 0
             }}>
               {documents.map(doc => (
@@ -247,15 +298,30 @@ const DocumentList = ({ topicName, onBackToTopics, onSetDocumentTitle }) => {
                   ) : (
                     <>
                       <div style={{ float: 'right' }}>
-                        <button onClick={() => setEditingDocHash(doc.hash)} style={{ marginRight: '0.5rem', padding: '0.25rem 0.5rem' }}>Edit</button>
-                        <button onClick={() => handleDeleteDocument(doc.hash, doc.title)} style={{ color: 'red', padding: '0.25rem 0.5rem' }}>&times;</button>
+                        <button onClick={() => setEditingDocHash(doc.hash)} style={{ padding: '0 1em', marginBottom: '0.2em' }}>Edit</button>
+                        <br/>
+                        <button onClick={() => handleDeleteDocument(doc.hash, doc.title)} style={{ color: 'red', padding: '0 0.45em' }}>Delete</button>
                       </div>
-                      <h4 onClick={() => setSelectedDocHash(doc.hash)} style={{ cursor: 'pointer', display: 'inline-block' }}>{doc.title}</h4>
-                      <p style={{ marginBottom: 0 }}>
-                        <span style={{ color: 'gray' }}>{doc.authors.join(', ') || 'N/A'}</span>
-                        {doc.year && <span style={{ color: 'dodgerblue' }}>{` • ${doc.year}`}</span>}
-                        {doc.tags.length > 0 && ` • ${doc.tags.join(', ')}`}
-                      </p>
+                      <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.5rem' }}>
+                        <div style={{ flexShrink: 0 }}>
+                          <span style={{ color: 'dodgerblue', fontWeight: 'bold' }}>{doc.year || 'N/A'}</span>
+                        </div>
+                        <div style={{ flexGrow: 1 }}>
+                          <h4 onClick={() => setSelectedDocHash(doc.hash)} style={{ cursor: 'pointer', margin: 0, display: 'inline-block' }}>{doc.title}</h4>
+                          <p style={{ margin: '0.25rem 0 0 0', color: 'gray' }}>
+                            {doc.authors.join(', ') || 'N/A'}
+                          </p>
+                                                    {doc.tags.length > 0 && (
+                            <p style={{ margin: '0.25rem 0 0 0' }}>
+                              {doc.tags.map(tag => (
+                                <span key={tag} style={{ backgroundColor: '#eee', color: '#333', padding: '2px 6px', borderRadius: '4px', marginRight: '5px', fontSize: '0.9em' }}>
+                                  {tag}
+                                </span>
+                              ))}
+                            </p>
+                          )}
+                        </div>
+                      </div>
                     </>
                   )}
                 </li>

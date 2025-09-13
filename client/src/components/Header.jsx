@@ -14,11 +14,11 @@ const Header = ({ title, onBack, backButtonText }) => {
       display: 'flex', 
       justifyContent: 'center', 
       alignItems: 'center', 
-      padding: '0.5rem', 
+      padding: '0rem',
       borderBottom: 'none', 
-      height: '50px',
+      height: '0px',
     }}>
-      <h1 style={{ marginBottom: 0 }}>{title}</h1>
+      
       {onBack && backButtonText && (
         <button onClick={onBack} style={{ padding: '0.5rem 1rem', marginLeft: 'auto' }}>
           &larr; {backButtonText}

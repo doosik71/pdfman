@@ -25,6 +25,10 @@ function App() {
     }
   }, [setCurrentView, setDocumentTitle]);
 
+  const handleTopicNameChange = useCallback((newTopicName) => {
+    setCurrentView(prev => ({ ...prev, topicName: newTopicName }));
+  }, [setCurrentView]);
+
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
   };
@@ -43,6 +47,7 @@ function App() {
           topicName={currentView.topicName} 
           onBackToTopics={() => handleNavigate('topics')} 
           onSetDocumentTitle={handleSetDocumentTitle} // Pass the callback
+          onTopicNameChange={handleTopicNameChange}
         />
       );
       headerProps = { title: documentTitle || currentView.topicName };
