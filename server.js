@@ -360,6 +360,44 @@ function initializeExpressApp() {
         }
     });
 
+    app.post('/api/chat/:hash', async (req, res) => {
+        const { hash } = req.params;
+        const { message } = req.body;
+        if (!message) return res.status(400).send('Message is required.');
+
+        const docInfo = await findDocument(hash);
+        if (!docInfo) return res.status(404).send('Document not found.');
+
+        try {
+            const pdfPath = path.join(path.dirname(docInfo.filePath), `${hash}.pdf`);
+            const pdfData = await fs.readFile(pdfPath);
+            const pdfText = (await pdf(pdfData)).text;
+
+            // For chat, we can use a more general prompt or a specific chat prompt if defined in userprompt.json
+            // For now, let's combine the PDF text and the user's message.
+            const chatPrompt = `You are a helpful assistant. Answer the following question based on the provided document text.
+Document Text:
+'''
+${pdfText}
+'''
+
+User Question: ${message}
+`;
+            const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+            const result = await model.generateContentStream(chatPrompt);
+
+            res.setHeader('Content-Type', 'text/plain; charset=utf-8');
+            for await (const chunk of result.stream) {
+                const chunkText = chunk.text();
+                res.write(chunkText);
+            }
+            res.end();
+        } catch (error) {
+            console.error("Chat error:", error);
+            res.status(500).send("Failed to generate chat response.");
+        }
+    });
+
     return app;
 }
 
