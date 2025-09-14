@@ -144,3 +144,16 @@ npm run build-electron
 ```
 
 This command will first build the React frontend and then package the Electron application into an executable for your operating system in the `dist_electron` directory.
+
+## Service Registration
+
+```bash
+sudo cp pdfman-server.service /etc/systemd/system/
+sudo cp pdfman-client.service /etc/systemd/system/
+sudo systemctl enable pdfman-server
+sudo systemctl enable pdfman-client
+sudo systemctl start pdfman-server
+sudo systemctl start pdfman-client
+sudo systemctl status pdfman-server
+sudo systemctl status pdfman-client
+```

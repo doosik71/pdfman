@@ -1,0 +1,14 @@
+[Unit]
+Description=PdfMan Server
+After=network.target
+
+[Service]
+Type=simple
+User=doosik
+WorkingDirectory=/home/doosik/works/pdfman
+ExecStart=/bin/bash -c 'source /home/doosik/.nvm/nvm.sh && npm start'
+Restart=on-failure
+Environment=NODE_ENV=production
+
+[Install]
+WantedBy=multi-user.target
