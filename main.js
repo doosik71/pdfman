@@ -18,13 +18,7 @@ function createWindow() {
   // Load the index.html of the app.
   // In development, you'd typically load from the Vite dev server.
   // In production, you'd load the built index.html file.
-  const startUrl = process.env.NODE_ENV === 'development'
-    ? 'http://localhost:5173' // Vite development server
-    : url.format({
-        pathname: path.join(__dirname, 'client', 'dist', 'index.html'),
-        protocol: 'file:',
-        slashes: true,
-      });
+  const startUrl = 'http://localhost:9030'; // The address of your Express server
 
   mainWindow.loadURL(startUrl);
 

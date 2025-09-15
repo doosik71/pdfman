@@ -6,7 +6,6 @@ const fsSync = require('fs');
 const path = require('path');
 const crypto = require('crypto');
 const multer = require('multer');
-const cors = require('cors');
 const axios = require('axios');
 const { GoogleGenerativeAI } = require('@google/generative-ai');
 const pdf = require('pdf-parse');
@@ -45,17 +44,14 @@ function checkEnvironmentVariables() {
 
 function initializeExpressApp() {
     const app = express();
-    app.use(cors({ origin: 'http://localhost:9031' }));
     app.use(express.json());
     app.use(express.urlencoded({ extended: true }));
-    app.use(express.static('public'));
 
-    app.get('/', (req, res) => {
-        res.send('<h1>PDFMan Backend</h1>');
-    });
+    // Serve static files from the React app
+    app.use(express.static(path.join(__dirname, 'client', 'dist')));
 
     // --- TOPIC API ---
-    app.get('/api/topics', async (req, res) => {
+    const getTopics = async (req, res) => {
         try {
             const files = await fs.readdir(dataDir, { withFileTypes: true });
             const topics = await Promise.all(files
@@ -69,9 +65,9 @@ function initializeExpressApp() {
                 }));
             res.json(topics);
         } catch (err) { res.status(500).send('Error reading topics directory.'); }
-    });
+    };
 
-    app.post('/api/topics', async (req, res) => {
+    const createTopic = async (req, res) => {
         const { topicName } = req.body;
         if (!topicName || topicName.includes('..') || topicName.includes('/')) {
             return res.status(400).send('Invalid topic name.');
@@ -81,9 +77,9 @@ function initializeExpressApp() {
             await fs.mkdir(newTopicPath, { recursive: true });
             res.status(201).send({ message: 'Topic created successfully.' });
         } catch (err) { res.status(500).send('Error creating topic.'); }
-    });
+    };
 
-    app.delete('/api/topics/:topicName', async (req, res) => {
+    const deleteTopic = async (req, res) => {
         const { topicName } = req.params;
         const topicPath = path.join(dataDir, topicName);
         try {
@@ -94,9 +90,9 @@ function initializeExpressApp() {
             await fs.rmdir(topicPath);
             res.send({ message: 'Topic deleted successfully.' });
         } catch (err) { res.status(500).send('Error deleting topic.'); }
-    });
+    };
 
-    app.put('/api/topics/:topicName', async (req, res) => {
+    const renameTopic = async (req, res) => {
         const { topicName } = req.params;
         const { newName } = req.body;
 
@@ -126,10 +122,10 @@ function initializeExpressApp() {
             console.error('Error renaming topic:', err);
             res.status(500).send('Error renaming topic.');
         }
-    });
+    };
 
     // --- DOCUMENT API ---
-    app.get('/api/topics/:topicName/documents', async (req, res) => {
+    const getDocuments = async (req, res) => {
         const { topicName } = req.params;
         const topicPath = path.join(dataDir, topicName);
         try {
@@ -150,9 +146,9 @@ function initializeExpressApp() {
             if (err.code === 'ENOENT') return res.status(404).send('Topic not found.');
             res.status(500).send('Error reading documents directory.');
         }
-    });
+    };
     
-    app.get('/api/documents/:hash', async (req, res) => {
+    const getDocumentByHash = async (req, res) => {
         const { hash } = req.params;
         const docInfo = await findDocument(hash);
         if (!docInfo) return res.status(404).send('Document not found.');
@@ -162,9 +158,9 @@ function initializeExpressApp() {
         } catch (err) {
             res.status(500).send('Error reading document data.');
         }
-    });
+    };
 
-    app.get('/api/pdfs/:hash', async (req, res) => {
+    const getPDF = async (req, res) => {
         const { hash } = req.params;
         const docInfo = await findDocument(hash);
         if (!docInfo) return res.status(404).send('Document not found.');
@@ -175,9 +171,9 @@ function initializeExpressApp() {
             console.error(err);
             res.status(500).send('Error sending PDF file.');
         }
-    });
+    };
 
-    app.post('/api/topics/:topicName/documents/upload', upload.single('file'), async (req, res) => {
+    const uploadDocument = async (req, res) => {
         const { topicName } = req.params;
         if (!req.file) return res.status(400).send('No file uploaded.');
         const topicPath = path.join(dataDir, topicName);
@@ -189,9 +185,9 @@ function initializeExpressApp() {
             await fs.writeFile(jsonPath, JSON.stringify(docData, null, 2));
             res.status(201).send(docData);
         } catch (err) { res.status(500).send('Error saving document.'); }
-    });
+    };
 
-    app.post('/api/topics/:topicName/documents/url', async (req, res) => {
+    const addDocumentFromUrl = async (req, res) => {
         const { topicName } = req.params;
         const { url } = req.body;
         if (!url) return res.status(400).send('URL is required.');
@@ -205,9 +201,9 @@ function initializeExpressApp() {
             await fs.writeFile(path.join(topicPath, `${hash}.json`), JSON.stringify(docData, null, 2));
             res.status(201).send(docData);
         } catch (err) { res.status(500).send('Failed to download or save PDF from URL.'); }
-    });
+    };
 
-    app.put('/api/documents/:hash', async (req, res) => {
+    const updateDocument = async (req, res) => {
         const { hash } = req.params;
         const docInfo = await findDocument(hash);
         if (!docInfo) return res.status(404).send('Document not found.');
@@ -217,9 +213,9 @@ function initializeExpressApp() {
             await fs.writeFile(docInfo.filePath, JSON.stringify(docData, null, 2));
             res.send(docData);
         } catch (err) { res.status(500).send('Error updating document.'); }
-    });
+    };
 
-    app.delete('/api/documents/:hash', async (req, res) => {
+    const deleteDocument = async (req, res) => {
         const { hash } = req.params;
         const docInfo = await findDocument(hash);
         if (!docInfo) return res.status(404).send('Document not found.');
@@ -230,9 +226,9 @@ function initializeExpressApp() {
             await fs.unlink(path.join(topicPath, `${hash}.md`)).catch(() => {});
             res.send({ message: 'Document deleted successfully.' });
         } catch (err) { res.status(500).send('Error deleting document.'); }
-    });
+    };
 
-    app.patch('/api/documents/:hash', async (req, res) => {
+    const moveDocument = async (req, res) => {
         const { hash } = req.params;
         const { newTopic } = req.body;
         const docInfo = await findDocument(hash);
@@ -246,10 +242,10 @@ function initializeExpressApp() {
             await fs.rename(path.join(oldTopicPath, `${hash}.md`), path.join(newTopicPath, `${hash}.md`)).catch(() => {});
             res.send({ message: `Document moved to ${newTopic}.` });
         } catch (err) { res.status(500).send('Error moving document.'); }
-    });
+    };
 
     // --- SETTINGS API ---
-    app.get('/api/settings', async (req, res) => {
+    const getSettings = async (req, res) => {
         try {
             const settings = {
                 data_folder: dataDir,
@@ -260,12 +256,10 @@ function initializeExpressApp() {
             console.error("Error fetching settings:", err);
             res.status(500).send('Error fetching settings.');
         }
-    });
-
-    
+    };
 
     // --- PROMPT API ---
-    app.get('/api/prompts', async (req, res) => {
+    const getPrompts = async (req, res) => {
         try {
             const userPromptPath = path.join(dataDir, 'userprompt.json');
             const prompts = JSON.parse(await fs.readFile(userPromptPath));
@@ -274,9 +268,9 @@ function initializeExpressApp() {
             if (err.code === 'ENOENT') return res.json({}); // Return empty if file not found
             res.status(500).send('Error reading prompts.');
         }
-    });
+    };
 
-    app.post('/api/prompts', async (req, res) => {
+    const createPrompt = async (req, res) => {
         const { key, content } = req.body;
         if (!key || !content) return res.status(400).send('Key and content are required.');
         try {
@@ -291,9 +285,9 @@ function initializeExpressApp() {
         } catch (err) {
             res.status(500).send('Error saving prompt.');
         }
-    });
+    };
 
-    app.put('/api/prompts/:promptKey', async (req, res) => {
+    const updatePrompt = async (req, res) => {
         const { promptKey } = req.params;
         const { content } = req.body;
         if (!content) return res.status(400).send('Content is required.');
@@ -307,9 +301,9 @@ function initializeExpressApp() {
         } catch (err) {
             res.status(500).send('Error updating prompt.');
         }
-    });
+    };
 
-    app.delete('/api/prompts/:promptKey', async (req, res) => {
+    const deletePrompt = async (req, res) => {
         const { promptKey } = req.params;
         if (promptKey === 'summarize') {
             return res.status(403).send('The "summarize" prompt cannot be deleted.');
@@ -324,10 +318,10 @@ function initializeExpressApp() {
         } catch (err) {
             res.status(500).send('Error deleting prompt.');
         }
-    });
+    };
 
     // --- SUMMARY API ---
-    app.get('/api/summaries/:hash', async (req, res) => {
+    const getSummary = async (req, res) => {
         const { hash } = req.params;
         const docInfo = await findDocument(hash);
         if (!docInfo) return res.status(404).send('Document not found.');
@@ -339,9 +333,9 @@ function initializeExpressApp() {
             if (err.code === 'ENOENT') return res.status(404).send('Summary not found.');
             res.status(500).send('Error reading summary.');
         }
-    });
+    };
 
-    app.delete('/api/summaries/:hash', async (req, res) => {
+    const deleteSummary = async (req, res) => {
         const { hash } = req.params;
         const docInfo = await findDocument(hash);
         if (!docInfo) return res.status(404).send('Document not found.');
@@ -353,9 +347,9 @@ function initializeExpressApp() {
             if (err.code === 'ENOENT') return res.status(404).send('Summary file not found.');
             res.status(500).send('Error deleting summary.');
         }
-    });
+    };
 
-    app.post('/api/summarize/:hash', async (req, res) => {
+    const summarizeDocument = async (req, res) => {
         const { hash } = req.params;
         const docInfo = await findDocument(hash);
         if (!docInfo) return res.status(404).send('Document not found.');
@@ -390,9 +384,9 @@ function initializeExpressApp() {
             console.error("Summarization error:", error);
             res.status(500).send("Failed to generate summary.");
         }
-    });
+    };
 
-    app.post('/api/chat/:hash', async (req, res) => {
+    const chatWithDocument = async (req, res) => {
         const { hash } = req.params;
         const { message } = req.body;
         if (!message) return res.status(400).send('Message is required.');
@@ -428,6 +422,47 @@ User Question: ${message}
             console.error("Chat error:", error);
             res.status(500).send("Failed to generate chat response.");
         }
+    };
+
+    // --- TOPIC API ---
+    app.get('/api/topics', getTopics);
+    app.post('/api/topics', createTopic);
+    app.delete('/api/topics/:topicName', deleteTopic);
+    app.put('/api/topics/:topicName', renameTopic);
+
+    // --- DOCUMENT API ---
+    app.get('/api/topics/:topicName/documents', getDocuments);
+    app.get('/api/documents/:hash', getDocumentByHash);
+    app.get('/api/pdfs/:hash', getPDF);
+    app.post('/api/topics/:topicName/documents/upload', upload.single('file'), uploadDocument);
+    app.post('/api/topics/:topicName/documents/url', addDocumentFromUrl);
+    app.put('/api/documents/:hash', updateDocument);
+    app.delete('/api/documents/:hash', deleteDocument);
+    app.patch('/api/documents/:hash', moveDocument);
+
+    // --- SETTINGS API ---
+    app.get('/api/settings', getSettings);
+
+    // --- PROMPT API ---
+    app.get('/api/prompts', getPrompts);
+    app.post('/api/prompts', createPrompt);
+    app.put('/api/prompts/:promptKey', updatePrompt);
+    app.delete('/api/prompts/:promptKey', deletePrompt);
+
+    // --- SUMMARY API ---
+    app.get('/api/summaries/:hash', getSummary);
+    app.delete('/api/summaries/:hash', deleteSummary);
+    app.post('/api/summarize/:hash', summarizeDocument);
+
+    // --- CHAT API ---
+    app.post('/api/chat/:hash', chatWithDocument);
+
+    app.use((req, res, next) => {
+      if (req.method === 'GET' && !req.path.startsWith('/api')) {
+        res.sendFile(path.join(__dirname, 'client', 'dist', 'index.html'));
+      } else {
+        next();
+      }
     });
 
     return app;
