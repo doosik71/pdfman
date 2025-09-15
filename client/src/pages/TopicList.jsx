@@ -85,11 +85,11 @@ const TopicList = ({ onNavigate }) => {
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem', alignContent: 'flex-start', justifyContent: 'center', overflowY: 'auto' }}>
           {topics.length > 0 ? (
             topics.map(topic => (
-              <TopicCard 
-                key={topic.name} 
-                topic={topic} 
-                onDelete={handleDeleteTopic} 
-                onSelect={(topicName) => onNavigate('documents', topicName)} 
+              <TopicCard
+                key={topic.name}
+                topic={topic}
+                onDelete={handleDeleteTopic}
+                onSelect={(topicName) => onNavigate('documents', topicName)}
               />
             ))
           ) : (

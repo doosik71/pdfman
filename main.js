@@ -2,6 +2,7 @@
 const { app, BrowserWindow } = require('electron');
 const path = require('path');
 const url = require('url');
+const startServer = require('./server.js');
 
 function createWindow() {
   // Create the browser window.
@@ -16,9 +17,7 @@ function createWindow() {
   });
 
   // Load the index.html of the app.
-  // In development, you'd typically load from the Vite dev server.
-  // In production, you'd load the built index.html file.
-  const startUrl = 'http://localhost:9030'; // The address of your Express server
+  const startUrl = process.env.ELECTRON_START_URL || 'http://localhost:9030';
 
   mainWindow.loadURL(startUrl);
 
@@ -29,7 +28,12 @@ function createWindow() {
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
-app.whenReady().then(createWindow);
+app.whenReady().then(() => {
+  if (!process.env.ELECTRON_START_URL) {
+    startServer();
+  }
+  createWindow();
+});
 
 // Quit when all windows are closed, except on macOS. There, it's common
 // for applications and their menu bar to stay active until the user quits

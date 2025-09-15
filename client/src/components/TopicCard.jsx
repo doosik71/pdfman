@@ -16,7 +16,8 @@ const TopicCard = ({ topic, onDelete, onSelect }) => {
     position: 'relative',
     padding: '0.5rem',
     borderRadius: '12px',
-    backgroundColor: '#fff',
+    backgroundColor: '#f7fafc',
+    border: '1px solid #e2e8f0',
     boxShadow: isCardHovered ? '0 8px 16px rgba(0,0,0,0.1)' : '0 4px 8px rgba(0,0,0,0.05)',
     transform: isCardHovered ? 'translateY(-4px)' : 'none',
     transition: 'transform 0.2s ease-in-out, boxShadow 0.2s ease-in-out',
@@ -53,8 +54,8 @@ const TopicCard = ({ topic, onDelete, onSelect }) => {
 
   const docCountStyle = {
     alignSelf: 'flex-end',
-    backgroundColor: '#eef2f7',
-    color: '#4a5568',
+    backgroundColor: '#EBF8FF',
+    color: '#3182CE',
     fontSize: '0.8rem',
     fontWeight: 'bold',
     padding: '0.25rem 0.5rem',

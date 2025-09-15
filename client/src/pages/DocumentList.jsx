@@ -289,7 +289,7 @@ const DocumentList = ({ topicName, onBackToTopics, onSetDocumentTitle, onTopicNa
               height: 0
             }}>
               {documents.map(doc => (
-                <li key={doc.hash} style={{ border: '1px solid #eee', padding: '0.5em 1rem', margin: '0.5em 0', borderRadius: '8px' }}>
+                <li key={doc.hash} style={{ backgroundColor: '#f7fafc', border: '1px solid #eee', padding: '0.5em 1rem', margin: '0.5em 0', borderRadius: '8px' }}>
                   {editingDocHash === doc.hash ? (
                     <EditDocumentForm
                       doc={doc}
