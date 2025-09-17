@@ -55,7 +55,7 @@ function initializeExpressApp() {
         try {
             const files = await fs.readdir(dataDir, { withFileTypes: true });
             const topics = await Promise.all(files
-                .filter(dirent => dirent.isDirectory())
+                .filter(dirent => dirent.isDirectory() && !dirent.name.startsWith('.'))
                 .map(async (dirent) => {
                     const topicPath = path.join(dataDir, dirent.name);
                     try {

@@ -1,2 +1,2 @@
 cd /d "%~dp0"
-dist_electron\win-unpacked\PDFMan.exe
+start dist_electron\win-unpacked\PDFMan.exe
