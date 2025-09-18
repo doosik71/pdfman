@@ -238,7 +238,7 @@ const DocumentDetail = ({ docHash, onBack, onSetDocumentTitle }) => {
                         <button onClick={() => setIsEditing(true)}>Edit</button>
                       </div>
                       <p>
-                        {details.authors.join(', ')}
+                        {(details.authors || []).join(', ')}
                         {details.year && ` (${details.year})`}
                       </p>
                     </div>
