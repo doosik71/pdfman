@@ -81,3 +81,25 @@ p {
   padding: 0.1em;
   border-radius: 6px;
 }
+
+.document-item {
+  background-color: #f7fafc;
+  border: 1px solid #eee;
+  padding: 0.5em 1rem;
+  margin: 0.5em 0;
+  border-radius: 8px;
+  transition: background-color 0.2s ease-in-out;
+}
+
+.document-item:hover {
+  background-color: #eef2f7;
+}
+
+@keyframes fadeOutYellow {
+  from { background-color: #ffecb3; } 
+  to { background-color: #f7fafc; }
+}
+
+.document-item.highlight {
+  animation: fadeOutYellow 1.5s ease-out;
+}

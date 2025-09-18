@@ -176,31 +176,85 @@ function initializeExpressApp() {
     const uploadDocument = async (req, res) => {
         const { topicName } = req.params;
         if (!req.file) return res.status(400).send('No file uploaded.');
+
         const topicPath = path.join(dataDir, topicName);
         const hash = crypto.createHash('sha256').update(req.file.buffer).digest('hex');
         const jsonPath = path.join(topicPath, `${hash}.json`);
+
         try {
-            await fs.writeFile(path.join(topicPath, `${hash}.pdf`), req.file.buffer);
-            const docData = { hash, title: req.file.originalname.replace(/\.pdf$/i, ''), authors: [], year: new Date().getFullYear(), tags: [], uploadDate: new Date().toISOString() };
-            await fs.writeFile(jsonPath, JSON.stringify(docData, null, 2));
-            res.status(201).send(docData);
-        } catch (err) { res.status(500).send('Error saving document.'); }
+            // Check if document exists by trying to access it.
+            await fs.access(jsonPath);
+
+            // If fs.access doesn't throw, the file exists.
+            const docContent = await fs.readFile(jsonPath, 'utf-8');
+            const docData = JSON.parse(docContent);
+            return res.status(200).json({ duplicate: true, doc: docData });
+
+        } catch (e) {
+            // If the error is that the file doesn't exist, we can proceed.
+            if (e.code === 'ENOENT') {
+                try {
+                    await fs.mkdir(topicPath, { recursive: true });
+                    await fs.writeFile(path.join(topicPath, `${hash}.pdf`), req.file.buffer);
+                    const docData = { hash, title: req.file.originalname.replace(/\.pdf$/i, ''), authors: [], year: new Date().getFullYear(), tags: [], uploadDate: new Date().toISOString() };
+                    await fs.writeFile(jsonPath, JSON.stringify(docData, null, 2));
+                    return res.status(201).send(docData);
+                } catch (saveErr) {
+                    console.error("Error saving new document:", saveErr);
+                    return res.status(500).send('Error saving document.');
+                }
+            } else {
+                // For any other error during access, it's a server error.
+                console.error("Error checking document existence:", e);
+                return res.status(500).send('Error checking for document existence.');
+            }
+        }
     };
 
     const addDocumentFromUrl = async (req, res) => {
         const { topicName } = req.params;
         const { url } = req.body;
         if (!url) return res.status(400).send('URL is required.');
-        const topicPath = path.join(dataDir, topicName);
+
         try {
             const response = await axios.get(url, { responseType: 'arraybuffer' });
             const pdfBuffer = response.data;
             const hash = crypto.createHash('sha256').update(pdfBuffer).digest('hex');
-            await fs.writeFile(path.join(topicPath, `${hash}.pdf`), pdfBuffer);
-            const docData = { hash, title: path.basename(new URL(url).pathname).replace(/\.pdf$/i, '') || 'Untitled', authors: [], year: new Date().getFullYear(), tags: [], source_url: url, uploadDate: new Date().toISOString() };
-            await fs.writeFile(path.join(topicPath, `${hash}.json`), JSON.stringify(docData, null, 2));
-            res.status(201).send(docData);
-        } catch (err) { res.status(500).send('Failed to download or save PDF from URL.'); }
+            const topicPath = path.join(dataDir, topicName);
+            const jsonPath = path.join(topicPath, `${hash}.json`);
+
+            try {
+                // Check if document exists by trying to access it.
+                await fs.access(jsonPath);
+
+                // If fs.access doesn't throw, the file exists.
+                const docContent = await fs.readFile(jsonPath, 'utf-8');
+                const docData = JSON.parse(docContent);
+                return res.status(200).json({ duplicate: true, doc: docData });
+
+            } catch (e) {
+                // If the error is that the file doesn't exist, we can proceed.
+                if (e.code === 'ENOENT') {
+                    try {
+                        await fs.mkdir(topicPath, { recursive: true });
+                        await fs.writeFile(path.join(topicPath, `${hash}.pdf`), pdfBuffer);
+                        const docData = { hash, title: path.basename(new URL(url).pathname).replace(/\.pdf$/i, '') || 'Untitled', authors: [], year: new Date().getFullYear(), tags: [], source_url: url, uploadDate: new Date().toISOString() };
+                        await fs.writeFile(jsonPath, JSON.stringify(docData, null, 2));
+                        return res.status(201).send(docData);
+                    } catch (saveErr) {
+                        console.error("Error saving new document from URL:", saveErr);
+                        return res.status(500).send('Error saving document from URL.');
+                    }
+                } else {
+                    // For any other error during access, it's a server error.
+                    console.error("Error checking document existence:", e);
+                    return res.status(500).send('Error checking for document existence.');
+                }
+            }
+        } catch (downloadErr) {
+            console.error("Error adding document from URL:", downloadErr);
+            return res.status(500).send('Failed to download or save PDF from URL.');
+        }
     };
 
     const updateDocument = async (req, res) => {

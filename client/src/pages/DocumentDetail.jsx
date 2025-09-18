@@ -182,7 +182,7 @@ const DocumentDetail = ({ docHash, onBack, onSetDocumentTitle }) => {
 
   return (
     <div id="document-detail-area" style={{ display: 'flex', flexDirection: 'column', height: 'calc(100vh - 16px)' }}>
-      <button onClick={onBack} style={{ alignSelf: 'flex-start', padding: '0.25rem 0.5rem', marginLeft: '1em', marginBottom: '0.5em', flexShrink: 0 }}>&larr; Back to Document List</button>
+      <button onClick={() => onBack(docHash)} style={{ alignSelf: 'flex-start', padding: '0.25rem 0.5rem', marginLeft: '1em', marginBottom: '0.5em', flexShrink: 0 }}>&larr; Back to Document List</button>
       {loading && <p>Loading document details...</p>}
       {error && <p style={{ color: 'red' }}>Error: {error}</p>}
       {details && (

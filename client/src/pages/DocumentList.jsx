@@ -11,35 +11,55 @@ const DocumentList = ({ topicName, onBackToTopics, onSetDocumentTitle, onTopicNa
   const [pdfUrl, setPdfUrl] = useState('');
   const [editingDocHash, setEditingDocHash] = useState(null);
   const [selectedDocHash, setSelectedDocHash] = useState(null);
+  const [highlightedDocHash, setHighlightedDocHash] = useState(null);
   const [isDraggingOver, setIsDraggingOver] = useState(false);
   const [isEditingTopic, setIsEditingTopic] = useState(false);
   const [newTopicName, setNewTopicName] = useState(topicName);
 
-  const memoizedOnBackToDocumentList = useCallback(() => {
+  const memoizedOnBackToDocumentList = useCallback((docHash) => {
     setSelectedDocHash(null);
+    if (docHash) {
+      setHighlightedDocHash(docHash);
+    }
     onSetDocumentTitle(''); // Reset documentTitle when going back to document list
   }, [setSelectedDocHash, onSetDocumentTitle]);
 
-  useEffect(() => {
-    const loadDocuments = async () => {
-      if (topicName && !selectedDocHash) {
-        try {
-          setLoading(true);
-          const response = await fetch(`${API_BASE_URL}/api/topics/${topicName}/documents`);
-          if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-          const data = await response.json();
-          setDocuments(data);
-          setError(null);
-        } catch (e) {
-          setError(e.message);
-        } finally {
-          setLoading(false);
-        }
+  const loadDocuments = useCallback(async () => {
+    if (topicName) {
+      try {
+        setLoading(true);
+        const response = await fetch(`${API_BASE_URL}/api/topics/${topicName}/documents`);
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+        const data = await response.json();
+        setDocuments(data);
+        setError(null);
+      } catch (e) {
+        setError(e.message);
+      } finally {
+        setLoading(false);
       }
-    };
+    }
+  }, [topicName]);
 
-    loadDocuments();
-  }, [topicName, selectedDocHash]);
+  useEffect(() => {
+    if (!selectedDocHash) {
+      loadDocuments();
+    }
+  }, [topicName, selectedDocHash, loadDocuments]);
+
+  useEffect(() => {
+    if (highlightedDocHash) {
+      const highlightedElement = document.querySelector(`.document-item.highlight`);
+      if (highlightedElement) {
+        highlightedElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+
+      const timer = setTimeout(() => {
+        setHighlightedDocHash(null);
+      }, 1500); // Match animation duration
+      return () => clearTimeout(timer);
+    }
+  }, [highlightedDocHash, documents]);
 
   const handleFileChange = (e) => {
     if (e.target.files) setSelectedFile(e.target.files[0]);
@@ -54,28 +74,22 @@ const DocumentList = ({ topicName, onBackToTopics, onSetDocumentTitle, onTopicNa
       setError(null);
       setLoading(true);
       const response = await fetch(`${API_BASE_URL}/api/topics/${topicName}/documents/upload`, { method: 'POST', body: formData });
+
+      const data = await response.json();
+
       if (!response.ok) {
-        const errorData = await response.text();
-        throw new Error(errorData || `File upload failed. Status: ${response.status}`);
+        throw new Error(data.message || `File upload failed. Status: ${response.status}`);
       }
-      setSelectedFile(null);
-      e.target.reset();
-      // After upload, re-fetch documents
-      const reFetchDocuments = async () => {
-        try {
-          setLoading(true);
-          const response = await fetch(`${API_BASE_URL}/api/topics/${topicName}/documents`);
-          if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-          const data = await response.json();
-          setDocuments(data);
-          setError(null);
-        } catch (e) {
-          setError(e.message);
-        } finally {
-          setLoading(false);
-        }
-      };
-      reFetchDocuments();
+
+      if (data.duplicate) {
+        // If duplicate, navigate to the document detail page
+        setSelectedDocHash(data.doc.hash);
+      } else {
+        // If new document was created, refetch the list
+        setSelectedFile(null);
+        if (e.target) e.target.reset();
+        await loadDocuments();
+      }
     } catch (err) {
       setError(err.message);
     } finally {
@@ -94,27 +108,19 @@ const DocumentList = ({ topicName, onBackToTopics, onSetDocumentTitle, onTopicNa
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ url: pdfUrl }),
       });
+
+      const data = await response.json();
+
       if (!response.ok) {
-        const errorData = await response.text();
-        throw new Error(errorData || `Failed to add from URL. Status: ${response.status}`);
+        throw new Error(data.message || `Failed to add from URL. Status: ${response.status}`);
       }
-      setPdfUrl('');
-      // After add from URL, re-fetch documents
-      const reFetchDocuments = async () => {
-        try {
-          setLoading(true);
-          const response = await fetch(`${API_BASE_URL}/api/topics/${topicName}/documents`);
-          if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-          const data = await response.json();
-          setDocuments(data);
-          setError(null);
-        } catch (e) {
-          setError(e.message);
-        } finally {
-          setLoading(false);
-        }
-      };
-      reFetchDocuments();
+
+      if (data.duplicate) {
+        setSelectedDocHash(data.doc.hash);
+      } else {
+        setPdfUrl('');
+        await loadDocuments();
+      }
     } catch (err) {
       setError(err.message);
     } finally {
@@ -132,22 +138,7 @@ const DocumentList = ({ topicName, onBackToTopics, onSetDocumentTitle, onTopicNa
         const errorData = await response.text();
         throw new Error(errorData || `Failed to delete document. Status: ${response.status}`);
       }
-      // After delete, re-fetch documents
-      const reFetchDocuments = async () => {
-        try {
-          setLoading(true);
-          const response = await fetch(`${API_BASE_URL}/api/topics/${topicName}/documents`);
-          if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-          const data = await response.json();
-          setDocuments(data);
-          setError(null);
-        } catch (e) {
-          setError(e.message);
-        } finally {
-          setLoading(false);
-        }
-      };
-      reFetchDocuments();
+      await loadDocuments();
     } catch (err) {
       setError(err.message);
     } finally {
@@ -169,22 +160,7 @@ const DocumentList = ({ topicName, onBackToTopics, onSetDocumentTitle, onTopicNa
         throw new Error(errorData || `Failed to update document. Status: ${response.status}`);
       }
       setEditingDocHash(null);
-      // After save, re-fetch documents
-      const reFetchDocuments = async () => {
-        try {
-          setLoading(true);
-          const response = await fetch(`${API_BASE_URL}/api/topics/${topicName}/documents`);
-          if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-          const data = await response.json();
-          setDocuments(data);
-          setError(null);
-        } catch (e) {
-          setError(e.message);
-        } finally {
-          setLoading(false);
-        }
-      };
-      reFetchDocuments();
+      await loadDocuments();
     } catch (err) {
       setError(err.message);
     } finally {
@@ -288,45 +264,49 @@ const DocumentList = ({ topicName, onBackToTopics, onSetDocumentTitle, onTopicNa
               margin: '0',
               height: 0
             }}>
-              {documents.map(doc => (
-                <li key={doc.hash} style={{ backgroundColor: '#f7fafc', border: '1px solid #eee', padding: '0.5em 1rem', margin: '0.5em 0', borderRadius: '8px' }}>
-                  {editingDocHash === doc.hash ? (
-                    <EditDocumentForm
-                      doc={doc}
-                      onSave={(updatedData) => handleSaveDocument(doc.hash, updatedData)}
-                      onCancel={() => setEditingDocHash(null)}
-                    />
-                  ) : (
-                    <>
-                      <div style={{ float: 'right' }}>
-                        <button onClick={() => setEditingDocHash(doc.hash)} style={{ padding: '0 1em', marginBottom: '0.2em' }}>Edit</button>
-                        <br/>
-                        <button onClick={() => handleDeleteDocument(doc.hash, doc.title)} style={{ color: 'red', padding: '0 0.45em' }}>Delete</button>
-                      </div>
-                      <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.5rem' }}>
-                        <div style={{ flexShrink: 0 }}>
-                          <span style={{ color: 'dodgerblue', fontWeight: 'bold' }}>{doc.year || 'N/A'}</span>
+              {documents.map(doc => {
+                const isHighlighted = doc.hash === highlightedDocHash;
+                const itemClassName = `document-item ${isHighlighted ? 'highlight' : ''}`.trim();
+                return (
+                  <li key={doc.hash} className={itemClassName}>
+                    {editingDocHash === doc.hash ? (
+                      <EditDocumentForm
+                        doc={doc}
+                        onSave={(updatedData) => handleSaveDocument(doc.hash, updatedData)}
+                        onCancel={() => setEditingDocHash(null)}
+                      />
+                    ) : (
+                      <>
+                        <div style={{ float: 'right' }}>
+                          <button onClick={() => setEditingDocHash(doc.hash)} style={{ padding: '0 1em', marginBottom: '0.2em' }}>Edit</button>
+                          <br />
+                          <button onClick={() => handleDeleteDocument(doc.hash, doc.title)} style={{ color: 'red', padding: '0 0.45em' }}>Delete</button>
                         </div>
-                        <div style={{ flexGrow: 1 }}>
-                          <h4 onClick={() => setSelectedDocHash(doc.hash)} style={{ cursor: 'pointer', margin: 0, display: 'inline-block' }}>{doc.title}</h4>
-                          <p style={{ margin: '0.25rem 0 0 0', color: 'gray' }}>
-                            {doc.authors.join(', ') || 'N/A'}
-                          </p>
-                                                    {doc.tags.length > 0 && (
-                            <p style={{ margin: '0.25rem 0 0 0' }}>
-                              {doc.tags.map(tag => (
-                                <span key={tag} style={{ backgroundColor: '#eee', color: '#333', padding: '2px 6px', borderRadius: '4px', marginRight: '5px', fontSize: '0.9em' }}>
-                                  {tag}
-                                </span>
-                              ))}
+                        <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.5rem' }}>
+                          <div style={{ flexShrink: 0 }}>
+                            <span style={{ color: 'dodgerblue', fontWeight: 'bold' }}>{doc.year || 'N/A'}</span>
+                          </div>
+                          <div style={{ flexGrow: 1 }}>
+                            <h4 onClick={() => setSelectedDocHash(doc.hash)} style={{ cursor: 'pointer', margin: 0, display: 'inline-block' }}>{doc.title}</h4>
+                            <p style={{ margin: '0.25rem 0 0 0', color: 'gray' }}>
+                              {doc.authors.join(', ') || 'N/A'}
                             </p>
-                          )}
+                            {doc.tags.length > 0 && (
+                              <p style={{ margin: '0.25rem 0 0 0' }}>
+                                {doc.tags.map(tag => (
+                                  <span key={tag} style={{ backgroundColor: '#eee', color: '#333', padding: '2px 6px', borderRadius: '4px', marginRight: '5px', fontSize: '0.9em' }}>
+                                    {tag}
+                                  </span>
+                                ))}
+                              </p>
+                            )}
+                          </div>
                         </div>
-                      </div>
-                    </>
-                  )}
-                </li>
-              ))}
+                      </>
+                    )}
+                  </li>
+                )
+              })}
             </ul>
           ) : (
             <p>No documents found in this topic. Add one below!</p>
