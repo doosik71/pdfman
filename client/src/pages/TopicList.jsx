@@ -13,6 +13,7 @@ const TopicList = ({ onNavigate }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [newTopicName, setNewTopicName] = useState('');
+  const [filterText, setFilterText] = useState('');
 
   const fetchTopics = useCallback(async () => {
     try {
@@ -67,24 +68,58 @@ const TopicList = ({ onNavigate }) => {
     }
   };
 
+  const filteredTopics = topics.filter(topic =>
+    topic.name.toLowerCase().includes(filterText.toLowerCase())
+  );
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', flexGrow: 1, minHeight: 0 }}>
       {loading && <p>Loading topics...</p>}
       {error && <p style={{ color: 'red' }}>Error: {error}</p>}
-      <form onSubmit={handleCreateTopic} style={{ margin: '0 auto 1rem', maxWidth: '400px', width: '100%' }}>
-        <input
-          type="text"
-          value={newTopicName}
-          onChange={(e) => setNewTopicName(e.target.value)}
-          placeholder="Enter new topic name"
-          style={{ marginRight: '1rem' }}
-        />
-        <button type="submit" style={{ padding: '0.25rem 0.5rem' }}>Add Topic</button>
-      </form>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', margin: '0 1rem 1rem 1rem' }}>
+        <form onSubmit={handleCreateTopic}>
+          <input
+            type="text"
+            value={newTopicName}
+            onChange={(e) => setNewTopicName(e.target.value)}
+            placeholder="Enter new topic name"
+            style={{ marginRight: '1rem' }}
+          />
+          <button type="submit" style={{ padding: '0.25rem 0.5rem' }}>Add Topic</button>
+        </form>
+        <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+          <input
+            type="text"
+            placeholder="Filter topics..."
+            value={filterText}
+            onChange={(e) => setFilterText(e.target.value)}
+            style={{ paddingRight: '20px' }}
+          />
+          {filterText && (
+            <button
+              onClick={() => setFilterText('')}
+              style={{
+                position: 'absolute',
+                right: '5px',
+                top: '50%',
+                transform: 'translateY(-50%)',
+                border: 'none',
+                background: 'transparent',
+                cursor: 'pointer',
+                padding: '0',
+                fontSize: '1rem',
+                lineHeight: '1'
+              }}
+            >
+              &times;
+            </button>
+          )}
+        </div>
+      </div>
       {!loading && (
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem', alignContent: 'flex-start', justifyContent: 'center', overflowY: 'auto' }}>
-          {topics.length > 0 ? (
-            topics.map(topic => (
+          {filteredTopics.length > 0 ? (
+            filteredTopics.map(topic => (
               <TopicCard
                 key={topic.name}
                 topic={topic}
@@ -93,7 +128,7 @@ const TopicList = ({ onNavigate }) => {
               />
             ))
           ) : (
-            <p>No topics found. Add one below!</p>
+            <p>No topics found.</p>
           )}
         </div>
       )}

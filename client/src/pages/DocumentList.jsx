@@ -15,6 +15,7 @@ const DocumentList = ({ topicName, onBackToTopics, onSetDocumentTitle, onTopicNa
   const [isDraggingOver, setIsDraggingOver] = useState(false);
   const [isEditingTopic, setIsEditingTopic] = useState(false);
   const [newTopicName, setNewTopicName] = useState(topicName);
+  const [filterText, setFilterText] = useState('');
 
   const memoizedOnBackToDocumentList = useCallback((docHash) => {
     setSelectedDocHash(null);
@@ -220,6 +221,15 @@ const DocumentList = ({ topicName, onBackToTopics, onSetDocumentTitle, onTopicNa
     }
   };
 
+  const filteredDocuments = documents.filter(doc => {
+    const searchTerm = filterText.toLowerCase();
+    return (
+      doc.title.toLowerCase().includes(searchTerm) ||
+      (doc.authors && doc.authors.join(', ').toLowerCase().includes(searchTerm)) ||
+      (doc.tags && doc.tags.join(', ').toLowerCase().includes(searchTerm))
+    );
+  });
+
   // Render the Document Detail view if a document is selected
   if (selectedDocHash) {
     return <DocumentDetail docHash={selectedDocHash} onBack={memoizedOnBackToDocumentList} onSetDocumentTitle={onSetDocumentTitle} />;
@@ -244,9 +254,39 @@ const DocumentList = ({ topicName, onBackToTopics, onSetDocumentTitle, onTopicNa
           <button onClick={() => { setIsEditingTopic(false); setError(null); }} style={{ padding: '0.25rem 0.5rem' }}>Cancel</button>
         </div>
       ) : (
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', margin: '0.5rem 0' }}>
-          <h2 style={{ margin: 0 }}>{topicName}</h2>
-          <button onClick={() => { setIsEditingTopic(true); setNewTopicName(topicName); }} style={{ padding: '0.25rem 0.5rem' }}>Edit</button>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem', margin: '0.5rem 1rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+            <h2 style={{ margin: 0 }}>{topicName}</h2>
+            <button onClick={() => { setIsEditingTopic(true); setNewTopicName(topicName); }} style={{ padding: '0.25rem 0.5rem' }}>Edit</button>
+          </div>
+          <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+            <input
+              type="text"
+              placeholder="Filter documents..."
+              value={filterText}
+              onChange={(e) => setFilterText(e.target.value)}
+              style={{ paddingRight: '20px' }}
+            />
+            {filterText && (
+              <button
+                onClick={() => setFilterText('')}
+                style={{
+                  position: 'absolute',
+                  right: '5px',
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  border: 'none',
+                  background: 'transparent',
+                  cursor: 'pointer',
+                  padding: '0',
+                  fontSize: '1rem',
+                  lineHeight: '1'
+                }}
+              >
+                &times;
+              </button>
+            )}
+          </div>
         </div>
       )}
 
@@ -255,7 +295,7 @@ const DocumentList = ({ topicName, onBackToTopics, onSetDocumentTitle, onTopicNa
 
       {!loading && !error && (
         <>
-          {documents.length > 0 ? (
+          {filteredDocuments.length > 0 ? (
             <ul style={{
               listStyle: 'none',
               padding: 0,
@@ -264,7 +304,7 @@ const DocumentList = ({ topicName, onBackToTopics, onSetDocumentTitle, onTopicNa
               margin: '0',
               height: 0
             }}>
-              {documents.map(doc => {
+              {filteredDocuments.map(doc => {
                 const isHighlighted = doc.hash === highlightedDocHash;
                 const itemClassName = `document-item ${isHighlighted ? 'highlight' : ''}`.trim();
                 return (
@@ -329,10 +369,12 @@ const DocumentList = ({ topicName, onBackToTopics, onSetDocumentTitle, onTopicNa
           onDrop={handleDrop}
         >
           <span>Upload New PDF:</span>
-          <form onSubmit={handleUploadSubmit}>
-            <input type="file" accept=".pdf" onChange={handleFileChange} />
-            <button type="submit" disabled={!selectedFile || loading} style={{ padding: '0.25rem 0.5rem' }}>Upload</button>
-            {selectedFile && <p>Selected: {selectedFile.name}</p>}
+          <form onSubmit={handleUploadSubmit} style={{ marginTop: '0.5rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <input type="file" accept=".pdf" onChange={handleFileChange} style={{ flexGrow: 1 }} />
+              <button type="submit" disabled={!selectedFile || loading} style={{ padding: '0.25rem 0.5rem' }}>Upload</button>
+            </div>
+            {selectedFile && <p style={{ margin: '0.5rem 0 0 0' }}>Selected: {selectedFile.name}</p>}
           </form>
         </div>
         <div
@@ -344,9 +386,11 @@ const DocumentList = ({ topicName, onBackToTopics, onSetDocumentTitle, onTopicNa
           }}
         >
           <span>Add from URL:</span>
-          <form onSubmit={handleAddFromUrlSubmit}>
-            <input type="url" value={pdfUrl} onChange={(e) => setPdfUrl(e.target.value)} placeholder="https://example.com/document.pdf" style={{ width: '250px' }} />
-            <button type="submit" disabled={!pdfUrl || loading} style={{ marginLeft: '1rem', padding: '0.25rem 0.5rem' }}>Add from URL</button>
+          <form onSubmit={handleAddFromUrlSubmit} style={{ marginTop: '0.5rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <input type="url" value={pdfUrl} onChange={(e) => setPdfUrl(e.target.value)} placeholder="https://example.com/document.pdf" style={{ flexGrow: 1, width: '100%', boxSizing: 'border-box' }} />
+              <button type="submit" disabled={!pdfUrl || loading} style={{ padding: '0.25rem 0.5rem' }}>Add</button>
+            </div>
           </form>
         </div>
       </div>
