@@ -243,7 +243,7 @@ const DocumentList = ({ topicName, onBackToTopics, onSetDocumentTitle, onTopicNa
       </div>
 
       {isEditingTopic ? (
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', margin: '1rem 0' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', margin: '0.5rem' }}>
           <input
             type="text"
             value={newTopicName}
@@ -254,7 +254,7 @@ const DocumentList = ({ topicName, onBackToTopics, onSetDocumentTitle, onTopicNa
           <button onClick={() => { setIsEditingTopic(false); setError(null); }} style={{ padding: '0.25rem 0.5rem' }}>Cancel</button>
         </div>
       ) : (
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem', margin: '0.5rem 1rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem', margin: '0.5rem' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
             <h2 style={{ margin: 0 }}>{topicName}</h2>
             <button onClick={() => { setIsEditingTopic(true); setNewTopicName(topicName); }} style={{ padding: '0.25rem 0.5rem' }}>Edit</button>
@@ -298,10 +298,10 @@ const DocumentList = ({ topicName, onBackToTopics, onSetDocumentTitle, onTopicNa
           {filteredDocuments.length > 0 ? (
             <ul style={{
               listStyle: 'none',
-              padding: 0,
+              padding: '0.5rem',
               flexGrow: 1,
               overflowY: 'auto',
-              margin: '0',
+              margin: 0,
               height: 0
             }}>
               {filteredDocuments.map(doc => {
@@ -355,7 +355,7 @@ const DocumentList = ({ topicName, onBackToTopics, onSetDocumentTitle, onTopicNa
       )}
 
       {/* Forms for adding documents */}
-      <div style={{ display: 'flex', gap: '1rem', flexShrink: 0 }}>
+      <div style={{ display: 'flex', gap: '0.5rem', flexShrink: 0, margin: '0.5rem' }}>
         <div
           style={{
             padding: '0.5rem',
@@ -372,7 +372,7 @@ const DocumentList = ({ topicName, onBackToTopics, onSetDocumentTitle, onTopicNa
           <form onSubmit={handleUploadSubmit} style={{ marginTop: '0.5rem' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
               <input type="file" accept=".pdf" onChange={handleFileChange} style={{ flexGrow: 1 }} />
-              <button type="submit" disabled={!selectedFile || loading} style={{ padding: '0.25rem 0.5rem' }}>Upload</button>
+              <button type="submit" disabled={!selectedFile || loading} style={{ padding: '0 0.5rem' }}>Upload</button>
             </div>
             {selectedFile && <p style={{ margin: '0.5rem 0 0 0' }}>Selected: {selectedFile.name}</p>}
           </form>
@@ -389,7 +389,7 @@ const DocumentList = ({ topicName, onBackToTopics, onSetDocumentTitle, onTopicNa
           <form onSubmit={handleAddFromUrlSubmit} style={{ marginTop: '0.5rem' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
               <input type="url" value={pdfUrl} onChange={(e) => setPdfUrl(e.target.value)} placeholder="https://example.com/document.pdf" style={{ flexGrow: 1, width: '100%', boxSizing: 'border-box' }} />
-              <button type="submit" disabled={!pdfUrl || loading} style={{ padding: '0.25rem 0.5rem' }}>Add</button>
+              <button type="submit" disabled={!pdfUrl || loading} style={{ padding: '0 0.5rem' }}>Add</button>
             </div>
           </form>
         </div>

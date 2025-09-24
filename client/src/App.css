@@ -1,8 +1,12 @@
-html, body, #root, * {
+html,
+body,
+#root,
+* {
   box-sizing: border-box;
 }
 
-html, body {
+html,
+body {
   margin: 0;
   padding: 0;
   height: 100%;
@@ -19,9 +23,11 @@ html, body {
   will-change: filter;
   transition: filter 300ms;
 }
+
 .logo:hover {
   filter: drop-shadow(0 0 2em #646cffaa);
 }
+
 .logo.react:hover {
   filter: drop-shadow(0 0 2em #61dafbaa);
 }
@@ -30,6 +36,7 @@ html, body {
   from {
     transform: rotate(0deg);
   }
+
   to {
     transform: rotate(360deg);
   }
@@ -53,7 +60,10 @@ h1 {
   font-size: 2em;
 }
 
-h1, h2, h3, h4 {
+h1,
+h2,
+h3,
+h4 {
   margin-top: 0;
   margin-bottom: 0.5em;
 }
@@ -63,9 +73,24 @@ p {
   margin-bottom: 0.5rem;
 }
 
-/* Styles for Markdown code blocks in summary */
+/* Styles for Markdown */
+
+#document-summary-panel h1,
+#document-summary-panel h2,
+#document-summary-panel h3,
+#document-summary-panel h4 {
+  margin-top: 1em;
+}
+
+#document-summary-panel ul,
+#document-summary-panel ol {
+  margin-top: 0.5em;
+  margin-bottom: 0.5em;
+}
+
 #document-summary-panel pre {
-  background-color: #f6f8fa; /* A light gray, common for code blocks */
+  background-color: #f6f8fa;
+  /* A light gray, common for code blocks */
   padding: 0.5rem;
   border-radius: 6px;
   overflow-x: auto;
@@ -76,7 +101,7 @@ p {
 }
 
 /* Style for inline code */
-#document-summary-panel :not(pre) > code {
+#document-summary-panel :not(pre)>code {
   background-color: rgba(175, 184, 193, 0.2);
   padding: 0.1em;
   border-radius: 6px;
@@ -96,8 +121,13 @@ p {
 }
 
 @keyframes fadeOutYellow {
-  from { background-color: #ffecb3; } 
-  to { background-color: #f7fafc; }
+  from {
+    background-color: #ffecb3;
+  }
+
+  to {
+    background-color: #f7fafc;
+  }
 }
 
 .document-item.highlight {

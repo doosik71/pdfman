@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import Header from './Header';
 
 /**
@@ -13,13 +13,14 @@ import Header from './Header';
  * @returns {React.ReactElement} The layout component.
  */
 const Layout = ({ children, onNavigate, isSidebarOpen, toggleSidebar, headerProps, currentViewName }) => {
+  const [isButtonHovered, setButtonHovered] = useState(false);
   const contentPadding = currentViewName === 'settings' ? '0' : '0.5rem';
 
   return (
     <div style={{ display: 'flex', height: '100vh', position: 'relative' }}>
       <aside
         style={{
-          width: isSidebarOpen ? '200px' : '0px',
+          width: isSidebarOpen ? '152px' : '0px',
           borderRight: isSidebarOpen ? '1px solid #ccc' : 'none',
           padding: isSidebarOpen ? '1rem' : '0',
           height: '100vh',
@@ -48,10 +49,12 @@ const Layout = ({ children, onNavigate, isSidebarOpen, toggleSidebar, headerProp
 
       <button
         onClick={toggleSidebar}
+        onMouseEnter={() => setButtonHovered(true)}
+        onMouseLeave={() => setButtonHovered(false)}
         style={{
           position: 'absolute',
           top: '0.8rem',
-          left: isSidebarOpen ? '188px' : '-12px',
+          left: isSidebarOpen ? '140px' : (isButtonHovered ? '0' : '-12px'),
           background: 'gray',
           color: 'white',
           border: 'none',
@@ -79,9 +82,9 @@ const Layout = ({ children, onNavigate, isSidebarOpen, toggleSidebar, headerProp
       }}>
         <Header {...headerProps} />
         <div id="main-content-area" style={{
-          padding: contentPadding,
+          padding: 0,
           flexGrow: 1,
-          width: isSidebarOpen ? 'calc(100vw - 200px)' : '100vw',
+          width: isSidebarOpen ? 'calc(100vw - 152px)' : '100vw',
           display: 'flex',
           flexDirection: 'column'
         }}>

@@ -73,20 +73,8 @@ const TopicList = ({ onNavigate }) => {
   );
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', flexGrow: 1, minHeight: 0 }}>
-      {loading && <p>Loading topics...</p>}
-      {error && <p style={{ color: 'red' }}>Error: {error}</p>}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', margin: '0 1rem 1rem 1rem' }}>
-        <form onSubmit={handleCreateTopic}>
-          <input
-            type="text"
-            value={newTopicName}
-            onChange={(e) => setNewTopicName(e.target.value)}
-            placeholder="Enter new topic name"
-            style={{ marginRight: '1rem' }}
-          />
-          <button type="submit" style={{ padding: '0.25rem 0.5rem' }}>Add Topic</button>
-        </form>
+    <div style={{ display: 'flex', flexDirection: 'column', flexGrow: 1, minHeight: 0, boxSizing: 'border-box' }}>
+      <div style={{ flexShrink: 0, display: 'flex', justifyContent: 'center', alignItems: 'center', marginBottom: '0.5rem' }}>
         <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
           <input
             type="text"
@@ -116,8 +104,10 @@ const TopicList = ({ onNavigate }) => {
           )}
         </div>
       </div>
+      {loading && <p>Loading topics...</p>}
+      {error && <p style={{ color: 'red' }}>Error: {error}</p>}
       {!loading && (
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem', alignContent: 'flex-start', justifyContent: 'center', overflowY: 'auto' }}>
+        <div style={{ flexGrow: 1, overflowY: 'auto', display: 'flex', flexWrap: 'wrap', gap: '1rem', alignContent: 'flex-start', justifyContent: 'center', padding: '0 0.5rem', height: 0 }}>
           {filteredTopics.length > 0 ? (
             filteredTopics.map(topic => (
               <TopicCard
@@ -132,6 +122,18 @@ const TopicList = ({ onNavigate }) => {
           )}
         </div>
       )}
+      <div style={{ flexShrink: 0, display: 'flex', justifyContent: 'center', alignItems: 'center', margin: '0.5rem' }}>
+        <form onSubmit={handleCreateTopic}>
+          <input
+            type="text"
+            value={newTopicName}
+            onChange={(e) => setNewTopicName(e.target.value)}
+            placeholder="Enter new topic name"
+            style={{ marginRight: '1rem' }}
+          />
+          <button type="submit" style={{ padding: '0.25rem 0.5rem' }}>Add Topic</button>
+        </form>
+      </div>
     </div>
   );
 };

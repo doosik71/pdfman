@@ -47,29 +47,29 @@ const TopicCard = ({ topic, onDelete, onSelect }) => {
 
   const titleStyle = {
     margin: 0,
-    fontSize: '1.1rem',
+    fontSize: '1rem',
     fontWeight: 600,
-    color: '#333',
+    color: topic.doc_count === 0 ? '#888' : '#333',
   };
 
   const docCountStyle = {
     alignSelf: 'flex-end',
     backgroundColor: '#EBF8FF',
     color: '#3182CE',
-    fontSize: '0.8rem',
+    fontSize: '0.7rem',
     fontWeight: 'bold',
-    padding: '0.25rem 0.5rem',
+    padding: '0.1rem 0.5rem',
     borderRadius: '12px',
   };
 
   return (
-    <div 
+    <div
       style={cardStyle}
       onMouseEnter={() => setIsCardHovered(true)}
       onMouseLeave={() => setIsCardHovered(false)}
       onClick={() => onSelect(topic.name)}
     >
-      <button 
+      <button
         onClick={(e) => { e.stopPropagation(); onDelete(topic.name); }}
         onMouseEnter={() => setIsButtonHovered(true)}
         onMouseLeave={() => setIsButtonHovered(false)}
@@ -78,11 +78,11 @@ const TopicCard = ({ topic, onDelete, onSelect }) => {
       >
         &times;
       </button>
-      
+
       <h3 style={titleStyle}>{topic.name}</h3>
-      
+
       <p style={docCountStyle}>
-        {topic.doc_count} docs
+        {Number(topic.doc_count).toLocaleString()}
       </p>
     </div>
   );
